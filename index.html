@@ -168,6 +168,74 @@
   }
   .notice strong { color: var(--ink); }
 
+  /* ---------- Announcements ---------- */
+  .announce-strip {
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 32px;
+  }
+  .announce-strip .announce-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .announce-strip .announce-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  .announce-add-btn {
+    font: inherit;
+    font-family: 'Heebo', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  .announce-add-btn:hover { text-decoration: underline; }
+  .announce-list { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+  .announce-list.expanded { max-height: 320px; overflow-y: auto; padding-inline-end: 4px; }
+  .announce-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 7px 0;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .announce-row:first-child { border-top: none; }
+  .announce-row .announce-date {
+    flex-shrink: 0;
+    font-family: 'Heebo', sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    padding-top: 1px;
+    white-space: nowrap;
+  }
+  .announce-row .announce-text { flex: 1; min-width: 0; font-size: 14px; color: var(--ink); }
+  .announce-row .announce-actions { flex-shrink: 0; display: flex; gap: 4px; }
+  .announce-toggle-btn {
+    font: inherit;
+    font-family: 'Heebo', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 0 0;
+  }
+  .announce-toggle-btn:hover { text-decoration: underline; }
+  .announce-empty { font-size: 13.5px; color: var(--ink-soft); margin-top: 8px; }
+
   /* ---------- Section headings ---------- */
   .section-head {
     display: flex;
@@ -188,6 +256,15 @@
   section { margin-bottom: 44px; }
 
   /* ---------- This week strip ---------- */
+  .upcoming-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 32px;
+  }
+  @media (max-width: 640px) {
+    .upcoming-columns { grid-template-columns: 1fr; gap: 32px; }
+  }
+  .upcoming-columns .section-head { margin-bottom: 12px; }
   .week-list {
     display: flex;
     flex-direction: column;
@@ -360,8 +437,11 @@
 
   .panel-columns {
     display: grid;
-    grid-template-columns: 1.3fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 26px;
+  }
+  @media (max-width: 900px) {
+    .panel-columns { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 640px) {
     .panel-columns { grid-template-columns: 1fr; }
@@ -583,12 +663,33 @@
 
   <div class="notice" id="status-notice" hidden></div>
 
-  <section id="week-section">
-    <div class="section-head">
-      <h2 id="week-heading">להגשה השבוע</h2>
-      <span class="hint" id="week-hint">בכל השיעורים</span>
+  <section id="announcements-section">
+    <div class="announce-strip">
+      <div class="announce-head">
+        <span class="announce-label" id="announcements-heading">הודעות</span>
+        <button type="button" class="announce-add-btn" id="add-announcement-btn" style="display:none;">+ הוספת הודעה</button>
+      </div>
+      <div id="announcements-body"></div>
     </div>
-    <div class="week-list" id="week-list"><div class="empty-state">טוען נתונים…</div></div>
+  </section>
+
+  <section id="week-section">
+    <div class="upcoming-columns">
+      <div>
+        <div class="section-head">
+          <h2 id="week-heading">להגשה השבוע</h2>
+          <span class="hint" id="week-hint">בכל השיעורים</span>
+        </div>
+        <div class="week-list" id="week-list"><div class="empty-state">טוען נתונים…</div></div>
+      </div>
+      <div>
+        <div class="section-head">
+          <h2 id="exams-heading">מבחנים קרובים</h2>
+          <span class="hint" id="exams-hint">בכל השיעורים</span>
+        </div>
+        <div class="week-list" id="exams-list"><div class="empty-state">טוען נתונים…</div></div>
+      </div>
+    </div>
   </section>
 
   <section id="schedule-section">
@@ -716,6 +817,56 @@
   </form>
 </dialog>
 
+<!-- ---------- Exam dialog ---------- -->
+<dialog id="exam-dialog">
+  <form class="dialog-inner" id="exam-form">
+    <h3 id="exam-dialog-title">הוספת מבחן</h3>
+    <div class="field">
+      <label for="exam-class">שיעור</label>
+      <select id="exam-class"></select>
+    </div>
+    <div class="field">
+      <label for="exam-title">כותרת</label>
+      <input type="text" id="exam-title" required maxlength="140" placeholder="לדוגמה: מבחן פרק 3">
+    </div>
+    <div class="field">
+      <label for="exam-details">חומר לבחינה (רשות)</label>
+      <textarea id="exam-details" maxlength="500"></textarea>
+    </div>
+    <div class="field">
+      <label for="exam-date">תאריך המבחן</label>
+      <input type="date" id="exam-date" required>
+    </div>
+    <p class="error-text" id="exam-error"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn danger" id="exam-delete-btn" style="display:none;">מחיקה</button>
+      <button type="button" class="btn" id="exam-cancel">ביטול</button>
+      <button type="submit" class="btn primary">שמירה</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ---------- Announcement dialog ---------- -->
+<dialog id="announcement-dialog">
+  <form class="dialog-inner" id="announcement-form">
+    <h3 id="announcement-dialog-title">הוספת הודעה</h3>
+    <div class="field">
+      <label for="announcement-text">תוכן ההודעה</label>
+      <textarea id="announcement-text" required maxlength="400"></textarea>
+    </div>
+    <div class="field">
+      <label for="announcement-date">תאריך</label>
+      <input type="date" id="announcement-date" required>
+    </div>
+    <p class="error-text" id="announcement-error"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn danger" id="announcement-delete-btn" style="display:none;">מחיקה</button>
+      <button type="button" class="btn" id="announcement-cancel">ביטול</button>
+      <button type="submit" class="btn primary">שמירה</button>
+    </div>
+  </form>
+</dialog>
+
 <!-- ---------- Confirm dialog ---------- -->
 <dialog id="confirm-dialog">
   <div class="dialog-inner">
@@ -734,9 +885,14 @@
     <h3>עריכת טקסטים באתר</h3>
     <div class="field"><label for="text-title">כותרת ראשית</label><input type="text" id="text-title" maxlength="80"></div>
     <div class="field"><label for="text-tagline">תת-כותרת</label><input type="text" id="text-tagline" maxlength="200"></div>
+    <div class="field"><label for="text-announcementsHeading">כותרת: הודעות</label><input type="text" id="text-announcementsHeading" maxlength="60"></div>
+    <div class="field"><label for="text-emptyAnnouncements">הודעה כשאין הודעות</label><input type="text" id="text-emptyAnnouncements" maxlength="120"></div>
     <div class="field"><label for="text-weekHeading">כותרת: להגשה השבוע</label><input type="text" id="text-weekHeading" maxlength="60"></div>
     <div class="field"><label for="text-weekHint">רמז: להגשה השבוע</label><input type="text" id="text-weekHint" maxlength="80"></div>
     <div class="field"><label for="text-emptyWeek">הודעה כשאין מה להגיש</label><input type="text" id="text-emptyWeek" maxlength="120"></div>
+    <div class="field"><label for="text-examsHeading">כותרת: מבחנים קרובים</label><input type="text" id="text-examsHeading" maxlength="60"></div>
+    <div class="field"><label for="text-examsHint">רמז: מבחנים קרובים</label><input type="text" id="text-examsHint" maxlength="80"></div>
+    <div class="field"><label for="text-emptyExams">הודעה כשאין מבחנים קרובים</label><input type="text" id="text-emptyExams" maxlength="120"></div>
     <div class="field"><label for="text-scheduleHeading">כותרת: מערכת שעות</label><input type="text" id="text-scheduleHeading" maxlength="60"></div>
     <div class="field"><label for="text-scheduleHint">רמז: מערכת שעות</label><input type="text" id="text-scheduleHint" maxlength="80"></div>
     <div class="field"><label for="text-emptySchedule">הודעה כשאין מערכת שעות</label><input type="text" id="text-emptySchedule" maxlength="120"></div>
@@ -744,6 +900,7 @@
     <div class="field"><label for="text-classesHint">רמז: שיעורים</label><input type="text" id="text-classesHint" maxlength="80"></div>
     <div class="field"><label for="text-emptyClasses">הודעה כשאין שיעורים</label><input type="text" id="text-emptyClasses" maxlength="120"></div>
     <div class="field"><label for="text-emptySummaries">הודעה כשאין סיכומים</label><input type="text" id="text-emptySummaries" maxlength="120"></div>
+    <div class="field"><label for="text-emptyClassExams">הודעה כשאין מבחנים (בכיתה)</label><input type="text" id="text-emptyClassExams" maxlength="120"></div>
     <div class="field"><label for="text-electivesHeading">כותרת: קורסי בחירה</label><input type="text" id="text-electivesHeading" maxlength="60"></div>
     <div class="field"><label for="text-electivesText">טקסט: קורסי בחירה (כשאין עדיין קורסי בחירה)</label><textarea id="text-electivesText" maxlength="400"></textarea></div>
     <div class="field"><label for="text-electivesPrompt">טקסט: הנחיה לבחירת קורסים (כשיש קורסי בחירה)</label><textarea id="text-electivesPrompt" maxlength="400"></textarea></div>
@@ -780,6 +937,8 @@
     <div class="field field-checkbox"><input type="checkbox" id="perm-classes"><label for="perm-classes">שיעורים ומערכת שעות</label></div>
     <div class="field field-checkbox"><input type="checkbox" id="perm-homework"><label for="perm-homework">שיעורי בית</label></div>
     <div class="field field-checkbox"><input type="checkbox" id="perm-summaries"><label for="perm-summaries">סיכומים יומיים</label></div>
+    <div class="field field-checkbox"><input type="checkbox" id="perm-exams"><label for="perm-exams">מבחנים</label></div>
+    <div class="field field-checkbox"><input type="checkbox" id="perm-announcements"><label for="perm-announcements">הודעות</label></div>
     <div class="field field-checkbox"><input type="checkbox" id="perm-siteText"><label for="perm-siteText">טקסטים באתר</label></div>
     <p class="error-text" id="password-manage-error"></p>
     <div class="dialog-actions">
@@ -800,9 +959,15 @@
   const SITE_TEXT_DEFAULTS = {
     title: 'חדר הכיתה',
     tagline: 'שיעורי בית, מערכת שעות ומה שקרה בכיתה — הכול במקום אחד.',
+    announcementsHeading: 'הודעות',
+    announcementsHint: '',
+    emptyAnnouncements: 'אין הודעות חדשות.',
     weekHeading: 'להגשה השבוע',
     weekHint: 'בכל השיעורים',
     emptyWeek: 'אין מה להגיש השבוע.',
+    examsHeading: 'מבחנים קרובים',
+    examsHint: 'בכל השיעורים',
+    emptyExams: 'אין מבחנים קרובים.',
     scheduleHeading: 'מערכת שעות שבועית',
     scheduleHint: 'לעריכה — כניסה במצב עריכה',
     emptySchedule: 'אין עדיין שיעורים במערכת השעות.',
@@ -810,6 +975,7 @@
     classesHint: 'שיעורי בית וסיכום יומי',
     emptyClasses: 'אין עדיין שיעורים.',
     emptySummaries: 'אין עדיין סיכומים.',
+    emptyClassExams: 'אין מבחנים קרובים.',
     electivesHeading: 'קורסי בחירה',
     electivesText: 'קורסי הבחירה עדיין לא פורסמו — ברגע שיישלחו, כל אחד מהם יקבל טאב משלו למעלה, לצד השיעורים הקבועים.',
     electivesPrompt: 'סמנו את קורסי הבחירה שבהם אתם משתתפים. הסימון נשמר רק במכשיר הזה, ורק הקורסים שסימנתם יופיעו במערכת השעות ובטאבים שלמעלה.',
@@ -824,11 +990,13 @@
   const SB_HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY };
 
   const MAIN_PASSWORD = 'Editor911!';
-  const ALL_PERMS = { classes: true, homework: true, summaries: true, siteText: true, managePasswords: true };
+  const ALL_PERMS = { classes: true, homework: true, summaries: true, exams: true, announcements: true, siteText: true, managePasswords: true };
   const PERM_FIELDS = [
     { key: 'classes', label: 'שיעורים ומערכת שעות' },
     { key: 'homework', label: 'שיעורי בית' },
     { key: 'summaries', label: 'סיכומים יומיים' },
+    { key: 'exams', label: 'מבחנים' },
+    { key: 'announcements', label: 'הודעות' },
     { key: 'siteText', label: 'טקסטים באתר' },
   ];
 
@@ -837,6 +1005,8 @@
   let classesById = {};
   let homework = [];
   let summaries = [];
+  let exams = [];
+  let announcements = [];
   let siteText = { ...SITE_TEXT_DEFAULTS };
   let lastUpdated = '';
   let activeClass = null;
@@ -941,7 +1111,9 @@
 
   function renderAll() {
     renderSiteText();
+    renderAnnouncements();
     renderWeek();
+    renderExams();
     renderSchedule();
     renderTabs();
     renderPanel();
@@ -952,8 +1124,11 @@
   function renderSiteText() {
     document.getElementById('site-title').textContent = siteText.title;
     document.getElementById('site-tagline').textContent = siteText.tagline;
+    document.getElementById('announcements-heading').textContent = siteText.announcementsHeading;
     document.getElementById('week-heading').textContent = siteText.weekHeading;
     document.getElementById('week-hint').textContent = siteText.weekHint;
+    document.getElementById('exams-heading').textContent = siteText.examsHeading;
+    document.getElementById('exams-hint').textContent = siteText.examsHint;
     document.getElementById('schedule-heading').textContent = siteText.scheduleHeading;
     document.getElementById('schedule-hint').textContent = siteText.scheduleHint;
     document.getElementById('schedule-empty').textContent = siteText.emptySchedule;
@@ -1046,6 +1221,84 @@
     }).join('');
   }
 
+  function renderExams() {
+    const list = document.getElementById('exams-list');
+    const today = startOfToday();
+    const upcoming = exams
+      .filter(ex => classesById[ex.classId] && parseDate(ex.date) && parseDate(ex.date) >= today)
+      .sort((a, b) => (parseDate(a.date) - parseDate(b.date)));
+
+    if (!upcoming.length) {
+      list.innerHTML = '<div class="empty-state">' + esc(siteText.emptyExams) + '</div>';
+      return;
+    }
+
+    list.innerHTML = upcoming.map(ex => {
+      const cls = classesById[ex.classId];
+      const cc = safeColor(cls.color);
+      const u = urgency({ due: ex.date });
+      return '<div class="week-item" style="--cc:' + cc + '">'
+        + '<div class="bar" style="background:var(--cc)"></div>'
+        + '<div class="main">'
+          + '<div class="class-label" style="color:var(--cc)">' + esc(cls.name) + '</div>'
+          + '<div class="title">' + esc(ex.title) + '</div>'
+        + '</div>'
+        + '<div class="meta">'
+          + '<span class="pill ' + u.key + '">' + u.label + '</span>'
+          + '<div class="due mono">' + fmtDate(ex.date) + '</div>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+  }
+
+  function renderAnnouncements() {
+    const addBtn = document.getElementById('add-announcement-btn');
+    addBtn.style.display = (editing && can('announcements')) ? 'inline-flex' : 'none';
+
+    const body = document.getElementById('announcements-body');
+    const sorted = announcements.slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+    if (!sorted.length) {
+      body.innerHTML = '<div class="announce-empty">' + esc(siteText.emptyAnnouncements) + '</div>';
+      return;
+    }
+
+    const collapsedCount = 2;
+    const showToggle = sorted.length > collapsedCount;
+
+    function rowHtml(a) {
+      return '<div class="announce-row">'
+        + '<div class="announce-date mono">' + fmtDate(a.date) + '</div>'
+        + '<div class="announce-text">' + esc(a.text) + '</div>'
+        + (can('announcements') ? '<div class="announce-actions"><button class="icon-btn" type="button" data-edit-announce="' + a.id + '">✎</button><button class="icon-btn" type="button" data-del-announce="' + a.id + '">✕</button></div>' : '')
+      + '</div>';
+    }
+
+    body.innerHTML = '<div class="announce-list" id="announce-list">' + sorted.map(rowHtml).join('') + '</div>'
+      + (showToggle ? '<button type="button" class="announce-toggle-btn" id="announce-toggle-btn">הצגת כל ההודעות (' + sorted.length + ')</button>' : '');
+
+    const listEl = document.getElementById('announce-list');
+    if (showToggle) {
+      let expanded = false;
+      const rows = Array.from(listEl.children);
+      rows.forEach((row, i) => { if (i >= collapsedCount) row.style.display = 'none'; });
+      document.getElementById('announce-toggle-btn').addEventListener('click', (e) => {
+        expanded = !expanded;
+        rows.forEach((row, i) => { row.style.display = (expanded || i < collapsedCount) ? '' : 'none'; });
+        listEl.classList.toggle('expanded', expanded);
+        e.target.textContent = expanded ? 'הצגה מצומצמת' : 'הצגת כל ההודעות (' + sorted.length + ')';
+      });
+    }
+
+    body.querySelectorAll('[data-edit-announce]').forEach(b => b.addEventListener('click', () => openAnnouncementDialog(announcements.find(a => a.id === b.dataset.editAnnounce))));
+    body.querySelectorAll('[data-del-announce]').forEach(b => b.addEventListener('click', async () => {
+      if (!(await confirmAction('למחוק הודעה זו?'))) return;
+      announcements = announcements.filter(a => a.id !== b.dataset.delAnnounce);
+      renderAll();
+      await saveState();
+    }));
+  }
+
   function renderSchedule() {
     const table = document.getElementById('schedule-table');
     const emptyEl = document.getElementById('schedule-empty');
@@ -1121,6 +1374,7 @@
 
     const hw = homework.filter(h => h.classId === activeClass).sort((a, b) => parseDue(a) - parseDue(b));
     const sums = summaries.filter(s => s.classId === activeClass).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const clsExams = exams.filter(ex => ex.classId === activeClass).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
     const scheduleStr = (cls.schedule || []).length
       ? cls.schedule.map(s => DAY_LABELS[s.day] || s.day).join('/') + ' · ' + cls.schedule[0].time
       : 'אין שעות משויכות';
@@ -1148,6 +1402,21 @@
         + '</div>').join('')
       : '<div class="empty-state">' + esc(siteText.emptySummaries) + '</div>';
 
+    const examHtml = clsExams.length
+      ? clsExams.map(ex => {
+          const u = urgency({ due: ex.date });
+          return '<div class="hw-card">'
+            + '<div class="title">' + esc(ex.title) + '</div>'
+            + (ex.details ? '<div class="details">' + esc(ex.details) + '</div>' : '')
+            + '<div class="row">'
+              + '<span class="pill ' + u.key + '">' + u.label + '</span>'
+              + '<span class="due-inline mono">' + fmtDate(ex.date) + '</span>'
+            + '</div>'
+            + (can('exams') ? '<div class="row edit-row"><button class="icon-btn" type="button" data-edit-exam="' + ex.id + '">✎ עריכה</button><button class="icon-btn" type="button" data-del-exam="' + ex.id + '">✕ מחיקה</button></div>' : '')
+          + '</div>';
+        }).join('')
+      : '<div class="empty-state">' + esc(siteText.emptyClassExams) + '</div>';
+
     panel.innerHTML = '<div class="class-panel-head">'
         + '<div class="head-left">'
           + '<h3 style="color:' + safeColor(cls.color) + '">' + esc(cls.name) + '</h3>'
@@ -1162,6 +1431,9 @@
         + '<div><div class="subhead">סיכום יומי</div><div class="summary-list">' + summaryHtml + '</div>'
           + (can('summaries') ? '<button class="add-btn" type="button" id="add-sum-btn">+ הוספת סיכום</button>' : '')
         + '</div>'
+        + '<div><div class="subhead">מבחנים</div><div class="hw-list">' + examHtml + '</div>'
+          + (can('exams') ? '<button class="add-btn" type="button" id="add-exam-btn">+ הוספת מבחן</button>' : '')
+        + '</div>'
       + '</div>';
 
     if (!editing) return;
@@ -1169,6 +1441,7 @@
     document.getElementById('class-edit-btn')?.addEventListener('click', () => openClassDialog(cls));
     document.getElementById('add-hw-btn')?.addEventListener('click', () => openHwDialog(null, activeClass));
     document.getElementById('add-sum-btn')?.addEventListener('click', () => openSumDialog(null, activeClass));
+    document.getElementById('add-exam-btn')?.addEventListener('click', () => openExamDialog(null, activeClass));
 
     panel.querySelectorAll('[data-edit-hw]').forEach(b => b.addEventListener('click', () => openHwDialog(homework.find(h => h.id === b.dataset.editHw))));
     panel.querySelectorAll('[data-del-hw]').forEach(b => b.addEventListener('click', async () => {
@@ -1181,6 +1454,13 @@
     panel.querySelectorAll('[data-del-sum]').forEach(b => b.addEventListener('click', async () => {
       if (!(await confirmAction('למחוק סיכום זה?'))) return;
       summaries = summaries.filter(s => s.id !== b.dataset.delSum);
+      renderAll();
+      await saveState();
+    }));
+    panel.querySelectorAll('[data-edit-exam]').forEach(b => b.addEventListener('click', () => openExamDialog(exams.find(ex => ex.id === b.dataset.editExam))));
+    panel.querySelectorAll('[data-del-exam]').forEach(b => b.addEventListener('click', async () => {
+      if (!(await confirmAction('למחוק את המבחן הזה?'))) return;
+      exams = exams.filter(ex => ex.id !== b.dataset.delExam);
       renderAll();
       await saveState();
     }));
@@ -1384,9 +1664,99 @@
     dlg.showModal();
   }
 
+  function openExamDialog(existing, presetClassId) {
+    const dlg = document.getElementById('exam-dialog');
+    const form = document.getElementById('exam-form');
+    form.reset();
+    document.getElementById('exam-dialog-title').textContent = existing ? 'עריכת מבחן' : 'הוספת מבחן';
+    populateClassSelect(document.getElementById('exam-class'), existing ? existing.classId : presetClassId);
+    document.getElementById('exam-title').value = existing ? existing.title : '';
+    document.getElementById('exam-details').value = existing ? (existing.details || '') : '';
+    document.getElementById('exam-date').value = existing ? existing.date : '';
+    const errorEl = document.getElementById('exam-error');
+    errorEl.textContent = '';
+    const deleteBtn = document.getElementById('exam-delete-btn');
+    deleteBtn.style.display = existing ? 'inline-block' : 'none';
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        classId: document.getElementById('exam-class').value,
+        title: document.getElementById('exam-title').value.trim(),
+        details: document.getElementById('exam-details').value.trim(),
+        date: document.getElementById('exam-date').value,
+      };
+      if (!data.title || !data.classId || !data.date) { errorEl.textContent = 'נא למלא שיעור, כותרת ותאריך.'; return; }
+      if (existing) {
+        Object.assign(existing, data);
+      } else {
+        exams.push({ id: genId(), ...data });
+      }
+      renderAll();
+      const res = await saveState();
+      if (res.ok) dlg.close();
+      else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה בשמירה.';
+    };
+
+    deleteBtn.onclick = async () => {
+      if (!existing) return;
+      if (!(await confirmAction('למחוק את המבחן הזה?'))) return;
+      exams = exams.filter(ex => ex.id !== existing.id);
+      renderAll();
+      const res = await saveState();
+      if (res.ok) dlg.close();
+      else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה במחיקה.';
+    };
+
+    dlg.showModal();
+  }
+
+  function openAnnouncementDialog(existing) {
+    const dlg = document.getElementById('announcement-dialog');
+    const form = document.getElementById('announcement-form');
+    form.reset();
+    document.getElementById('announcement-dialog-title').textContent = existing ? 'עריכת הודעה' : 'הוספת הודעה';
+    document.getElementById('announcement-text').value = existing ? existing.text : '';
+    document.getElementById('announcement-date').value = existing ? existing.date : new Date().toISOString().slice(0, 10);
+    const errorEl = document.getElementById('announcement-error');
+    errorEl.textContent = '';
+    const deleteBtn = document.getElementById('announcement-delete-btn');
+    deleteBtn.style.display = existing ? 'inline-block' : 'none';
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        text: document.getElementById('announcement-text').value.trim(),
+        date: document.getElementById('announcement-date').value,
+      };
+      if (!data.text || !data.date) { errorEl.textContent = 'נא למלא תוכן ותאריך.'; return; }
+      if (existing) {
+        Object.assign(existing, data);
+      } else {
+        announcements.push({ id: genId(), ...data });
+      }
+      renderAll();
+      const res = await saveState();
+      if (res.ok) dlg.close();
+      else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה בשמירה.';
+    };
+
+    deleteBtn.onclick = async () => {
+      if (!existing) return;
+      if (!(await confirmAction('למחוק הודעה זו?'))) return;
+      announcements = announcements.filter(a => a.id !== existing.id);
+      renderAll();
+      const res = await saveState();
+      if (res.ok) dlg.close();
+      else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה במחיקה.';
+    };
+
+    dlg.showModal();
+  }
+
   /* ---------------- Site text dialog ---------------- */
 
-  const TEXT_FIELDS = ['title', 'tagline', 'weekHeading', 'weekHint', 'emptyWeek', 'scheduleHeading', 'scheduleHint', 'emptySchedule', 'classesHeading', 'classesHint', 'emptyClasses', 'emptySummaries', 'electivesHeading', 'electivesText', 'electivesPrompt', 'footer'];
+  const TEXT_FIELDS = ['title', 'tagline', 'announcementsHeading', 'emptyAnnouncements', 'weekHeading', 'weekHint', 'emptyWeek', 'examsHeading', 'examsHint', 'emptyExams', 'scheduleHeading', 'scheduleHint', 'emptySchedule', 'classesHeading', 'classesHint', 'emptyClasses', 'emptySummaries', 'emptyClassExams', 'electivesHeading', 'electivesText', 'electivesPrompt', 'footer'];
 
   function openTextDialog() {
     const dlg = document.getElementById('text-dialog');
@@ -1488,7 +1858,7 @@
     const match = rows.find(r => r.password_hash === hash);
     if (match) {
       editing = true;
-      currentPerms = { classes: false, homework: false, summaries: false, siteText: false, managePasswords: false, ...match.permissions };
+      currentPerms = { classes: false, homework: false, summaries: false, exams: false, announcements: false, siteText: false, managePasswords: false, ...match.permissions };
       document.getElementById('password-dialog').close();
       renderAll();
     } else {
@@ -1552,6 +1922,9 @@
   document.getElementById('class-cancel').addEventListener('click', () => document.getElementById('class-dialog').close());
   document.getElementById('hw-cancel').addEventListener('click', () => document.getElementById('hw-dialog').close());
   document.getElementById('sum-cancel').addEventListener('click', () => document.getElementById('sum-dialog').close());
+  document.getElementById('exam-cancel').addEventListener('click', () => document.getElementById('exam-dialog').close());
+  document.getElementById('announcement-cancel').addEventListener('click', () => document.getElementById('announcement-dialog').close());
+  document.getElementById('add-announcement-btn').addEventListener('click', () => openAnnouncementDialog(null));
 
   /* ---------------- Data wiring ---------------- */
 
@@ -1567,6 +1940,8 @@
     classes.forEach(c => { classesById[c.id] = c; });
     homework = data.homework || [];
     summaries = data.summaries || [];
+    exams = data.exams || [];
+    announcements = data.announcements || [];
     siteText = { ...SITE_TEXT_DEFAULTS, ...(data.siteText || {}) };
     lastUpdated = data.updatedAt || '';
     document.getElementById('updated-date').textContent = lastUpdated ? fmtDate(lastUpdated) : '—';
@@ -1605,6 +1980,8 @@
       classes,
       homework,
       summaries,
+      exams,
+      announcements,
       siteText,
       updatedAt: new Date().toISOString().slice(0, 10),
     };
