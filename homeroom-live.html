@@ -513,6 +513,9 @@
   .field-checkbox { flex-direction: row; align-items: center; gap: 8px; }
   .field-checkbox input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
   .field-checkbox label { font-size: 13.5px; color: var(--ink); cursor: pointer; }
+  .password-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .password-row:last-child { border-bottom: none; }
+  .password-row .pw-meta { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
 
   input[type="text"], input[type="date"], input[type="time"], input[type="password"], textarea, select {
     font: inherit;
@@ -571,6 +574,7 @@
       <div class="header-actions">
         <button class="edit-toggle" id="theme-toggle" type="button" aria-label="החלפת מצב תצוגה">🌙</button>
         <button class="edit-toggle" id="edit-text-btn" type="button" style="display:none;">✎ טקסטים</button>
+        <button class="edit-toggle" id="manage-passwords-btn" type="button" style="display:none;">🔑 סיסמאות</button>
         <button class="edit-toggle" id="edit-toggle" type="button" style="display:none;">✎ עריכה</button>
       </div>
       <div class="updated">עודכן לאחרונה<br><span class="mono" id="updated-date">—</span></div>
@@ -753,6 +757,38 @@
   </form>
 </dialog>
 
+<!-- ---------- Edit password dialog ---------- -->
+<dialog id="password-dialog">
+  <form class="dialog-inner" id="password-form">
+    <h3>כניסה למצב עריכה</h3>
+    <div class="field"><label for="password-input">סיסמה</label><input type="password" id="password-input" required autocomplete="off"></div>
+    <p class="error-text" id="password-error"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" id="password-cancel">ביטול</button>
+      <button type="submit" class="btn primary">כניסה</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ---------- Password management dialog ---------- -->
+<dialog id="password-manage-dialog">
+  <div class="dialog-inner">
+    <h3>ניהול סיסמאות עריכה</h3>
+    <div id="password-list"></div>
+    <div class="field"><label for="new-pw-label">שם / תיאור הסיסמה</label><input type="text" id="new-pw-label" maxlength="60" placeholder="לדוגמה: אחראי/ת שיעורי בית"></div>
+    <div class="field"><label for="new-pw-value">סיסמה חדשה</label><input type="text" id="new-pw-value" maxlength="60"></div>
+    <div class="field field-checkbox"><input type="checkbox" id="perm-classes"><label for="perm-classes">שיעורים ומערכת שעות</label></div>
+    <div class="field field-checkbox"><input type="checkbox" id="perm-homework"><label for="perm-homework">שיעורי בית</label></div>
+    <div class="field field-checkbox"><input type="checkbox" id="perm-summaries"><label for="perm-summaries">סיכומים יומיים</label></div>
+    <div class="field field-checkbox"><input type="checkbox" id="perm-siteText"><label for="perm-siteText">טקסטים באתר</label></div>
+    <p class="error-text" id="password-manage-error"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" id="password-manage-close">סגירה</button>
+      <button type="button" class="btn primary" id="add-password-btn">הוספת סיסמה</button>
+    </div>
+  </div>
+</dialog>
+
 <!--HR_DATA_START--><script type="application/json" id="app-data">{"classes":[{"id":"utn7urmr9owjoj6djzl4","name":"ספרות והבעה","color":"#a6a9ab","elective":false,"order":0,"schedule":[{"day":"Sun","period":"1","time":"8:30 - 9:15"},{"day":"Sun","period":"2","time":"9:15 - 10:00"},{"day":"Thu","period":"3","time":"10:15 - 11:00"},{"day":"Thu","period":"4","time":"11:00 - 11:45"}]},{"id":"kl8pam4y4c6hpbn772oc","name":"ערבית","color":"#ff00c8","elective":false,"order":1,"schedule":[{"day":"Sun","period":"3","time":"10:15 - 11:00"},{"day":"Mon","period":"6","time":"13:35 - 12:50"},{"day":"Mon","period":"7","time":"14:05 - 14:45"}]},{"id":"83rchyjsvf1wks7uoehw","name":"כימיה","color":"#7f8255","elective":false,"order":2,"schedule":[{"day":"Sun","period":"5","time":"12:05 - 12:50"},{"day":"Wed","period":"5","time":"12:05 - 12:50"},{"day":"Wed","period":"6","time":"12:50 - 13:35"}]},{"id":"vxvimsrc5or8mf9tpmzx","name":"ביולוגיה","color":"#ffd500","elective":false,"order":3,"schedule":[{"day":"Sun","period":"4","time":"11:00 - 11:45"},{"day":"Wed","period":"1","time":"8:30 - 9:15"},{"day":"Wed","period":"2","time":"9:15 - 10:00"}]},{"id":"6hfhca0vrcp8mpaw5jbh","name":"מתמטיקה","color":"#e467c9","elective":false,"order":4,"schedule":[{"day":"Sun","period":"6","time":"12:50 - 13:35"},{"day":"Wed","period":"3","time":"10:15 - 11:00"},{"day":"Wed","period":"4","time":"11:00 - 11:45"},{"day":"Thu","period":"7","time":"14:05 - 14:45"},{"day":"Thu","period":"8","time":"14:45 - 15:25"},{"day":"Thu","period":"9","time":"15:30 - 16:15"}]},{"id":"t4xbt3u1nw4kj3br50vc","name":"אנגלית","color":"#cc8585","elective":false,"order":5,"schedule":[{"day":"Sun","period":"7","time":"14:05 - 14:45"},{"day":"Sun","period":"8","time":"14:45 - 15:25"},{"day":"Tue","period":"1","time":"8:30 - 9:15"},{"day":"Tue","period":"2","time":"9:15 - 10:00"}]},{"id":"qb9bzdkgszuj6tna1w60","name":"תרבות ישראל","color":"#84c8f5","elective":false,"order":6,"schedule":[{"day":"Mon","period":"1","time":"8:30 - 9:15"},{"day":"Mon","period":"2","time":"9:15 - 10:00"}]},{"id":"683edn413vf1qc92dtnx","name":"אדם ועולם","color":"#2ac200","elective":false,"order":7,"schedule":[{"day":"Mon","period":"3","time":"10:15 - 11:00"},{"day":"Mon","period":"4","time":"11:00 - 11:45"},{"day":"Thu","period":"5","time":"12:05 - 12:50"},{"day":"Thu","period":"6","time":"12:50 - 13:35"}]},{"id":"naglbaymlhsm6tlyxgj1","name":"של\"ח","color":"#912121","elective":false,"order":8,"schedule":[{"day":"Mon","period":"5","time":"12:05 - 12:50"}]},{"id":"9ggw7y5gfxd41e63rgb1","name":"חינוך גופני","color":"#87a202","elective":false,"order":9,"schedule":[{"day":"Mon","period":"8","time":"14:45 - 15:25"},{"day":"Wed","period":"7","time":"14:05 - 14:45"}]},{"id":"3rc0t59eje1eg539ll7r","name":"חינוך","color":"#ff9500","elective":false,"order":10,"schedule":[{"day":"Tue","period":"3","time":"10:15 - 11:00"},{"day":"Wed","period":"8","time":"14:45 - 15:25"},{"day":"Thu","period":"2","time":"9:15 - 10:00"}]},{"id":"gawq1319vy6do5497ha2","name":"מוזיקה","color":"#7300ff","elective":false,"order":11,"schedule":[{"day":"Tue","period":"4","time":"11:00 - 11:45"}]},{"id":"1bcgeu1lvf8nsxts16w1","name":"תנ\"ך","color":"#7fd062","elective":false,"order":12,"schedule":[{"day":"Tue","period":"5","time":"12:05 - 12:50"},{"day":"Tue","period":"6","time":"12:50 - 13:35"}]},{"id":"lbkqux8oqq3ah8htyrff","name":"כימיה אתגר","color":"#927245","elective":true,"order":13,"schedule":[{"day":"Sun","period":"5","time":"12:05 - 12:50"},{"day":"Wed","period":"5","time":"12:05 - 12:50"},{"day":"Wed","period":"6","time":"12:50 - 13:35"}]}],"homework":[],"summaries":[],"siteText":{"classesHeading":"שיעורים","classesHint":"","electivesHeading":"אתגרים","electivesPrompt":"תסמנו את האתגרים שבהם אתם משתתפים בהם.","electivesText":"קורסי הבחירה עדיין לא פורסמו — ברגע שיישלחו, כל אחד מהם יקבל טאב משלו למעלה, לצד השיעורים הקבועים.","emptyClasses":"אין עדיין שיעורים.","emptySchedule":"אין עדיין שיעורים במערכת השעות.","emptySummaries":"אין עדיין סיכומים.","emptyWeek":"אין שיעורי בית להגיש השבוע","footer":"","scheduleHeading":"מערכת שעות","scheduleHint":"","tagline":"","title":"חדר הכיתה","weekHeading":"להגשה השבוע","weekHint":""},"updatedAt":"2026-09-09"}</script><!--HR_DATA_END-->
 
 <script>
@@ -783,8 +819,18 @@
   const SUPABASE_URL = 'https://thbverdqtbuvxcfkcwbk.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoYnZlcmRxdGJ1dnhjZmtjd2JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTE0ODksImV4cCI6MjEwMjYyNzQ4OX0.uLsi7p_KVgYpH1FuCZdFwMCPV1kmsksKF1-bAtFgodA';
   const STATE_ENDPOINT = SUPABASE_URL + '/rest/v1/homeroom_state?id=eq.1';
+  const PASSWORDS_ENDPOINT = SUPABASE_URL + '/rest/v1/homeroom_passwords';
   const REFRESH_INTERVAL_MS = 45000;
   const SB_HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY };
+
+  const MAIN_PASSWORD = 'Editor911!';
+  const ALL_PERMS = { classes: true, homework: true, summaries: true, siteText: true, managePasswords: true };
+  const PERM_FIELDS = [
+    { key: 'classes', label: 'שיעורים ומערכת שעות' },
+    { key: 'homework', label: 'שיעורי בית' },
+    { key: 'summaries', label: 'סיכומים יומיים' },
+    { key: 'siteText', label: 'טקסטים באתר' },
+  ];
 
   let saving = false;
   let classes = [];
@@ -795,10 +841,20 @@
   let lastUpdated = '';
   let activeClass = null;
   let editing = false;
+  let currentPerms = null;
   let selectedElectives = new Set();
 
   function genId() {
     try { return crypto.randomUUID(); } catch (_) { return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10); }
+  }
+
+  function can(scope) {
+    return !!(currentPerms && currentPerms[scope]);
+  }
+
+  async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
   try { selectedElectives = new Set(JSON.parse(localStorage.getItem('hr_electives') || '[]')); } catch (_) {}
@@ -1038,7 +1094,7 @@
         + '<span class="dot" style="background:' + cc + '"></span>' + esc(c.name)
       + '</button>';
     }).join('');
-    if (editing) html += '<button class="tab add-tab" type="button" id="add-class-tab">+ הוספת שיעור</button>';
+    if (can('classes')) html += '<button class="tab add-tab" type="button" id="add-class-tab">+ הוספת שיעור</button>';
     tabs.innerHTML = html;
 
     tabs.querySelectorAll('.tab[data-id]').forEach(btn => {
@@ -1057,7 +1113,7 @@
     const vis = visibleClasses();
 
     if (!vis.length) {
-      panel.innerHTML = '<div class="empty-state">' + esc(siteText.emptyClasses) + (editing ? ' לחצו על "הוספת שיעור" למעלה כדי להתחיל.' : '') + '</div>';
+      panel.innerHTML = '<div class="empty-state">' + esc(siteText.emptyClasses) + (can('classes') ? ' לחצו על "הוספת שיעור" למעלה כדי להתחיל.' : '') + '</div>';
       return;
     }
     if (!activeClass || !classesById[activeClass] || !vis.some(c => c.id === activeClass)) activeClass = vis[0].id;
@@ -1079,7 +1135,7 @@
               + '<span class="pill ' + u.key + '">' + u.label + '</span>'
               + '<span class="due-inline mono">' + fmtDate(h.due) + (h.dueTime ? ', ' + esc(h.dueTime) : '') + '</span>'
             + '</div>'
-            + (editing ? '<div class="row edit-row"><button class="icon-btn" type="button" data-edit-hw="' + h.id + '">✎ עריכה</button><button class="icon-btn" type="button" data-del-hw="' + h.id + '">✕ מחיקה</button></div>' : '')
+            + (can('homework') ? '<div class="row edit-row"><button class="icon-btn" type="button" data-edit-hw="' + h.id + '">✎ עריכה</button><button class="icon-btn" type="button" data-del-hw="' + h.id + '">✕ מחיקה</button></div>' : '')
           + '</div>';
         }).join('')
       : '<div class="empty-state">לא פורסמו שיעורי בית ל' + esc(cls.name) + '.</div>';
@@ -1088,23 +1144,23 @@
       ? sums.map(s => '<div class="summary-card" style="--cc:' + safeColor(cls.color) + '">'
           + '<div class="date">' + fmtDate(s.date) + '</div>'
           + '<p>' + esc(s.text) + '</p>'
-          + (editing ? '<div class="row"><button class="icon-btn" type="button" data-edit-sum="' + s.id + '">✎ עריכה</button><button class="icon-btn" type="button" data-del-sum="' + s.id + '">✕ מחיקה</button></div>' : '')
+          + (can('summaries') ? '<div class="row"><button class="icon-btn" type="button" data-edit-sum="' + s.id + '">✎ עריכה</button><button class="icon-btn" type="button" data-del-sum="' + s.id + '">✕ מחיקה</button></div>' : '')
         + '</div>').join('')
       : '<div class="empty-state">' + esc(siteText.emptySummaries) + '</div>';
 
     panel.innerHTML = '<div class="class-panel-head">'
         + '<div class="head-left">'
           + '<h3 style="color:' + safeColor(cls.color) + '">' + esc(cls.name) + '</h3>'
-          + (editing ? '<button class="icon-btn" type="button" id="class-edit-btn">✎ עריכת שיעור</button>' : '')
+          + (can('classes') ? '<button class="icon-btn" type="button" id="class-edit-btn">✎ עריכת שיעור</button>' : '')
         + '</div>'
         + '<span class="when">' + esc(scheduleStr) + '</span>'
       + '</div>'
       + '<div class="panel-columns">'
         + '<div><div class="subhead">שיעורי בית</div><div class="hw-list">' + hwHtml + '</div>'
-          + (editing ? '<button class="add-btn" type="button" id="add-hw-btn">+ הוספת שיעורי בית</button>' : '')
+          + (can('homework') ? '<button class="add-btn" type="button" id="add-hw-btn">+ הוספת שיעורי בית</button>' : '')
         + '</div>'
         + '<div><div class="subhead">סיכום יומי</div><div class="summary-list">' + summaryHtml + '</div>'
-          + (editing ? '<button class="add-btn" type="button" id="add-sum-btn">+ הוספת סיכום</button>' : '')
+          + (can('summaries') ? '<button class="add-btn" type="button" id="add-sum-btn">+ הוספת סיכום</button>' : '')
         + '</div>'
       + '</div>';
 
@@ -1133,15 +1189,18 @@
   function updateEditButton() {
     const btn = document.getElementById('edit-toggle');
     const textBtn = document.getElementById('edit-text-btn');
+    const pwBtn = document.getElementById('manage-passwords-btn');
     btn.style.display = 'inline-flex';
     if (editing) {
       btn.textContent = '✓ מצב עריכה פעיל — לסיום';
       btn.classList.add('active');
-      textBtn.style.display = 'inline-flex';
+      textBtn.style.display = can('siteText') ? 'inline-flex' : 'none';
+      pwBtn.style.display = can('managePasswords') ? 'inline-flex' : 'none';
     } else {
       btn.textContent = '✎ עריכה';
       btn.classList.remove('active');
       textBtn.style.display = 'none';
+      pwBtn.style.display = 'none';
     }
   }
 
@@ -1359,9 +1418,135 @@
 
   /* ---------------- Edit gate ---------------- */
 
+  async function fetchCustomPasswords() {
+    try {
+      const res = await fetch(PASSWORDS_ENDPOINT + '?select=id,label,password_hash,permissions&order=created_at.asc', { headers: SB_HEADERS });
+      if (!res.ok) return [];
+      return await res.json();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  async function createCustomPassword(label, passwordHash, permissions) {
+    try {
+      const res = await fetch(PASSWORDS_ENDPOINT, {
+        method: 'POST',
+        headers: { ...SB_HEADERS, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ id: genId(), label, password_hash: passwordHash, permissions }),
+      });
+      return res.ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function deleteCustomPassword(id) {
+    try {
+      const res = await fetch(PASSWORDS_ENDPOINT + '?id=eq.' + encodeURIComponent(id), { method: 'DELETE', headers: SB_HEADERS });
+      return res.ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function openPasswordDialog() {
+    const dlg = document.getElementById('password-dialog');
+    const input = document.getElementById('password-input');
+    document.getElementById('password-error').textContent = '';
+    input.value = '';
+    dlg.showModal();
+    input.focus();
+  }
+
   document.getElementById('edit-toggle').addEventListener('click', () => {
-    editing = !editing;
-    renderAll();
+    if (editing) {
+      editing = false;
+      currentPerms = null;
+      renderAll();
+    } else {
+      openPasswordDialog();
+    }
+  });
+
+  document.getElementById('password-cancel').addEventListener('click', () => document.getElementById('password-dialog').close());
+
+  document.getElementById('password-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById('password-error');
+    const pw = document.getElementById('password-input').value;
+    errorEl.textContent = '';
+    if (pw === MAIN_PASSWORD) {
+      editing = true;
+      currentPerms = { ...ALL_PERMS };
+      document.getElementById('password-dialog').close();
+      renderAll();
+      return;
+    }
+    const hash = await sha256Hex(pw);
+    const rows = await fetchCustomPasswords();
+    const match = rows.find(r => r.password_hash === hash);
+    if (match) {
+      editing = true;
+      currentPerms = { classes: false, homework: false, summaries: false, siteText: false, managePasswords: false, ...match.permissions };
+      document.getElementById('password-dialog').close();
+      renderAll();
+    } else {
+      errorEl.textContent = 'סיסמה שגויה.';
+    }
+  });
+
+  async function renderPasswordList() {
+    const listEl = document.getElementById('password-list');
+    listEl.innerHTML = '<div class="empty-state">טוען…</div>';
+    const rows = await fetchCustomPasswords();
+    if (!rows.length) {
+      listEl.innerHTML = '<div class="empty-state">אין עדיין סיסמאות מותאמות אישית.</div>';
+      return;
+    }
+    listEl.innerHTML = rows.map(r => {
+      const granted = PERM_FIELDS.filter(p => r.permissions && r.permissions[p.key]).map(p => p.label).join(', ') || 'ללא הרשאות';
+      return '<div class="password-row"><div><strong>' + esc(r.label) + '</strong><div class="pw-meta">' + esc(granted) + '</div></div>'
+        + '<button type="button" class="icon-btn" data-del-pw="' + r.id + '">✕ מחיקה</button></div>';
+    }).join('');
+    listEl.querySelectorAll('[data-del-pw]').forEach(b => b.addEventListener('click', async () => {
+      if (!(await confirmAction('למחוק סיסמה זו?'))) return;
+      await deleteCustomPassword(b.dataset.delPw);
+      await renderPasswordList();
+    }));
+  }
+
+  document.getElementById('manage-passwords-btn').addEventListener('click', () => {
+    document.getElementById('password-manage-error').textContent = '';
+    document.getElementById('new-pw-label').value = '';
+    document.getElementById('new-pw-value').value = '';
+    PERM_FIELDS.forEach(p => { document.getElementById('perm-' + p.key).checked = false; });
+    document.getElementById('password-manage-dialog').showModal();
+    renderPasswordList();
+  });
+
+  document.getElementById('password-manage-close').addEventListener('click', () => document.getElementById('password-manage-dialog').close());
+
+  document.getElementById('add-password-btn').addEventListener('click', async () => {
+    const errorEl = document.getElementById('password-manage-error');
+    errorEl.textContent = '';
+    const label = document.getElementById('new-pw-label').value.trim();
+    const value = document.getElementById('new-pw-value').value;
+    const permissions = {};
+    PERM_FIELDS.forEach(p => { permissions[p.key] = document.getElementById('perm-' + p.key).checked; });
+    if (!label || !value) { errorEl.textContent = 'נא למלא שם וסיסמה.'; return; }
+    if (value.length < 4) { errorEl.textContent = 'הסיסמה חייבת להכיל לפחות 4 תווים.'; return; }
+    if (!Object.values(permissions).some(Boolean)) { errorEl.textContent = 'נא לסמן לפחות הרשאה אחת.'; return; }
+    const hash = await sha256Hex(value);
+    const ok = await createCustomPassword(label, hash, permissions);
+    if (ok) {
+      document.getElementById('new-pw-label').value = '';
+      document.getElementById('new-pw-value').value = '';
+      PERM_FIELDS.forEach(p => { document.getElementById('perm-' + p.key).checked = false; });
+      renderPasswordList();
+    } else {
+      errorEl.textContent = 'שגיאה בשמירת הסיסמה. נסו שוב.';
+    }
   });
 
   document.getElementById('class-cancel').addEventListener('click', () => document.getElementById('class-dialog').close());
