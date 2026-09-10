@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>חדר הכיתה</title>
+<meta name="description" content="מעקב שיעורי בית לכיתה, מערכת שעות שבועית וסיכומים יומיים — ניתן לעריכה.">
+<script>
+  try {
+    var hrTheme = localStorage.getItem('hr_theme');
+    if (hrTheme === 'dark' || hrTheme === 'light') document.documentElement.setAttribute('data-theme', hrTheme);
+  } catch (_) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;600;700&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #EAEDE6;
+    --surface: #FFFFFF;
+    --surface-2: #F4F5EF;
+    --ink: #1E2620;
+    --ink-soft: #57624E;
+    --ink-faint: #838F7A;
+    --border: #D3D8C8;
+    --accent: #2F5D50;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #DCE7E1;
+    --amber: #9C6A16;
+    --amber-soft: #F3E3C4;
+    --red: #A3384A;
+    --red-soft: #F1DADE;
+    --shadow: 0 1px 2px rgba(30, 38, 32, 0.06), 0 4px 14px rgba(30, 38, 32, 0.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121714;
+      --surface: #1A211C;
+      --surface-2: #1F2721;
+      --ink: #E8ECE4;
+      --ink-soft: #A9B6A0;
+      --ink-faint: #6D7A67;
+      --border: #2B352E;
+      --accent: #74BBA0;
+      --accent-ink: #0E1613;
+      --accent-soft: #223730;
+      --amber: #E8B96B;
+      --amber-soft: #3A311D;
+      --red: #E38C99;
+      --red-soft: #3B2229;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #121714;
+    --surface: #1A211C;
+    --surface-2: #1F2721;
+    --ink: #E8ECE4;
+    --ink-soft: #A9B6A0;
+    --ink-faint: #6D7A67;
+    --border: #2B352E;
+    --accent: #74BBA0;
+    --accent-ink: #0E1613;
+    --accent-soft: #223730;
+    --amber: #E8B96B;
+    --amber-soft: #3A311D;
+    --red: #E38C99;
+    --red-soft: #3B2229;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Heebo', system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 28px 20px 64px;
+  }
+
+  h1, h2, h3 { font-family: 'Frank Ruhl Libre', Georgia, serif; text-wrap: balance; margin: 0; }
+
+  a { color: inherit; }
+
+  .mono {
+    font-family: 'Heebo', system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Header ---------- */
+  header.site {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 22px;
+    margin-bottom: 26px;
+    border-bottom: 2px solid var(--border);
+  }
+  header.site h1 {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  header.site .tagline {
+    color: var(--ink-soft);
+    font-size: 15px;
+    margin-top: 4px;
+  }
+  .header-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  header.site .updated {
+    font-size: 12px;
+    color: var(--ink-faint);
+    text-align: left;
+  }
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  /* ---------- Edit controls ---------- */
+  .edit-toggle {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .edit-toggle:hover { color: var(--ink); border-color: var(--ink-faint); }
+  .edit-toggle.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .edit-toggle:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ---------- Status notice ---------- */
+  .notice {
+    border: 1px dashed var(--border);
+    background: var(--surface-2);
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 28px;
+  }
+  .notice strong { color: var(--ink); }
+
+  /* ---------- Section headings ---------- */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .section-head h2 {
+    font-size: 21px;
+    font-weight: 600;
+  }
+  .section-head .hint {
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+
+  section { margin-bottom: 44px; }
+
+  /* ---------- This week strip ---------- */
+  .week-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .week-item {
+    display: grid;
+    grid-template-columns: 4px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+  }
+  .week-item .bar { align-self: stretch; border-radius: 3px; }
+  .week-item .main { min-width: 0; }
+  .week-item .class-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+  }
+  .week-item .title {
+    font-size: 15px;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .week-item .meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .week-item .due {
+    font-size: 13px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .week-item .due .day { color: var(--ink-faint); font-size: 11.5px; display: block; }
+
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .pill.today { background: var(--red-soft); color: var(--red); }
+  .pill.soon { background: var(--amber-soft); color: var(--amber); }
+  .pill.later { background: var(--accent-soft); color: var(--accent); }
+
+  .empty-state {
+    color: var(--ink-faint);
+    font-size: 14px;
+    padding: 18px;
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+  }
+
+  /* ---------- Schedule ---------- */
+  .schedule-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+  table.schedule {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    font-size: 13.5px;
+    min-width: 560px;
+  }
+  table.schedule th, table.schedule td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    text-align: right;
+    vertical-align: top;
+  }
+  table.schedule th:last-child, table.schedule td:last-child { border-left: none; }
+  table.schedule tr:last-child td { border-bottom: none; }
+  table.schedule thead th {
+    background: var(--surface-2);
+    font-family: 'Heebo', sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+  }
+  table.schedule .period-label {
+    font-family: 'Heebo', sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+  .cell-class {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    border-right: 3px solid var(--cc, transparent);
+    padding-right: 8px;
+  }
+  .cell-class .cname { font-weight: 600; color: var(--cc, var(--ink)); }
+  .cell-class .ctime { font-size: 11px; color: var(--ink-faint); font-family: 'Heebo', sans-serif; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Class tabs ---------- */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .tab {
+    font: inherit;
+    font-family: 'Heebo', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 8px 16px 9px;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    background: var(--surface-2);
+    color: var(--ink-soft);
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+  }
+  .tab .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-left: 7px;
+  }
+  .tab[aria-selected="true"] {
+    background: var(--surface);
+    color: var(--cc, var(--ink));
+    border-bottom: 1px solid var(--surface);
+  }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .tab.add-tab {
+    border-style: dashed;
+    color: var(--ink-faint);
+    background: transparent;
+  }
+  .tab.add-tab:hover { color: var(--accent); border-color: var(--accent); }
+
+  .class-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px 0 10px 10px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .class-panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .class-panel-head .head-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .class-panel-head .when {
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    font-family: 'Heebo', sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .panel-columns {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 26px;
+  }
+  @media (max-width: 640px) {
+    .panel-columns { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 18px 14px 48px; }
+    header.site h1 { font-size: 27px; }
+    .field-row { flex-direction: column; }
+    .slot-row { grid-template-columns: 1fr 1fr; grid-template-areas: "day remove" "period time"; }
+    .slot-row select { grid-area: day; }
+    .slot-row [data-remove] { grid-area: remove; justify-self: start; }
+    .slot-row input[data-f="period"] { grid-area: period; }
+    .slot-row input[data-f="time"] { grid-area: time; }
+  }
+
+  .subhead {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+
+  .hw-list, .summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .hw-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .hw-card .title { font-weight: 600; font-size: 14.5px; }
+  .hw-card .details { font-size: 13px; color: var(--ink-soft); margin-top: 3px; }
+  .hw-card .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .hw-card .due-inline { font-size: 12px; }
+
+  .summary-card {
+    border-right: 2px solid var(--cc, var(--border));
+    padding-right: 12px;
+  }
+  .summary-card .date {
+    font-family: 'Heebo', sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .summary-card p { font-size: 13.5px; margin: 3px 0 0; color: var(--ink); }
+  .summary-card .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+
+  /* ---------- Electives ---------- */
+  .electives-card {
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  .elective-prompt { margin-bottom: 12px; }
+  .elective-picker { display: flex; flex-direction: column; gap: 2px; }
+  .elective-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 4px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .elective-item:last-child { border-bottom: none; }
+  .elective-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--cc, var(--accent)); cursor: pointer; }
+  .elective-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hw-card, .week-item { transition: border-color 0.15s ease; }
+  }
+
+  /* ---------- Edit affordances ---------- */
+  .icon-btn {
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .icon-btn:hover { background: var(--surface-2); color: var(--ink); }
+
+  .add-btn {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px dashed var(--border);
+    background: transparent;
+    color: var(--ink-faint);
+    cursor: pointer;
+  }
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .edit-row { justify-content: flex-end !important; gap: 8px !important; }
+
+  /* ---------- Dialogs ---------- */
+  dialog {
+    border: none;
+    border-radius: 14px;
+    padding: 0;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+    max-width: 440px;
+    width: calc(100% - 40px);
+  }
+  dialog::backdrop { background: rgba(10, 14, 11, 0.45); }
+  .dialog-inner { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+  .dialog-inner h3 { font-size: 18px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+  .field-row { display: flex; gap: 10px; }
+  .field-row .field { flex: 1; }
+  .field-checkbox { flex-direction: row; align-items: center; gap: 8px; }
+  .field-checkbox input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+  .field-checkbox label { font-size: 13.5px; color: var(--ink); cursor: pointer; }
+
+  input[type="text"], input[type="date"], input[type="time"], input[type="password"], textarea, select {
+    font: inherit;
+    font-size: 14px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--ink);
+    width: 100%;
+  }
+  input[type="color"] {
+    width: 56px;
+    height: 34px;
+    padding: 2px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    cursor: pointer;
+  }
+  textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .slot-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 6px; margin-bottom: 6px; align-items: center; }
+
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+  .btn {
+    font: inherit;
+    padding: 8px 16px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--ink);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.danger { background: var(--red-soft); border-color: var(--red-soft); color: var(--red); margin-inline-end: auto; }
+
+  .error-text { color: var(--red); font-size: 12.5px; min-height: 16px; margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="site">
+    <div>
+      <h1 id="site-title">חדר הכיתה</h1>
+      <div class="tagline" id="site-tagline">שיעורי בית, מערכת שעות ומה שקרה בכיתה — הכול במקום אחד.</div>
+    </div>
+    <div class="header-side">
+      <div class="header-actions">
+        <button class="edit-toggle" id="theme-toggle" type="button" aria-label="החלפת מצב תצוגה">🌙</button>
+        <button class="edit-toggle" id="edit-text-btn" type="button" style="display:none;">✎ טקסטים</button>
+        <button class="edit-toggle" id="edit-toggle" type="button" style="display:none;">✎ עריכה</button>
+      </div>
+      <div class="updated">עודכן לאחרונה<br><span class="mono" id="updated-date">—</span></div>
+    </div>
+  </header>
+
+  <div class="notice" id="status-notice" hidden></div>
+
+  <section id="week-section">
+    <div class="section-head">
+      <h2 id="week-heading">להגשה השבוע</h2>
+      <span class="hint" id="week-hint">בכל השיעורים</span>
+    </div>
+    <div class="week-list" id="week-list"><div class="empty-state">טוען נתונים…</div></div>
+  </section>
+
+  <section id="schedule-section">
+    <div class="section-head">
+      <h2 id="schedule-heading">מערכת שעות שבועית</h2>
+      <span class="hint" id="schedule-hint">לעריכה — כניסה במצב עריכה</span>
+    </div>
+    <div class="schedule-scroll">
+      <table class="schedule" id="schedule-table"></table>
+    </div>
+    <div class="empty-state" id="schedule-empty" hidden></div>
+  </section>
+
+  <section id="classes-section">
+    <div class="section-head">
+      <h2 id="classes-heading">שיעורים</h2>
+      <span class="hint" id="classes-hint">שיעורי בית וסיכום יומי</span>
+    </div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="class-panel" id="class-panel"></div>
+  </section>
+
+  <section id="electives-section">
+    <div class="section-head">
+      <h2 id="electives-heading">קורסי בחירה</h2>
+    </div>
+    <div id="electives-body"></div>
+  </section>
+
+  <footer id="site-footer">
+    הדף הזה משותף לכל הכיתה — כל אחד יכול לערוך אותו. נא לשמור על תוכן מדויק ומכבד.
+  </footer>
+
+</div>
+
+<!-- ---------- Class dialog ---------- -->
+<dialog id="class-dialog">
+  <form class="dialog-inner" id="class-form">
+    <h3 id="class-dialog-title">הוספת שיעור</h3>
+    <div class="field-row">
+      <div class="field">
+        <label for="class-name">שם השיעור</label>
+        <input type="text" id="class-name" required maxlength="60">
+      </div>
+      <div class="field" style="flex: 0 0 auto;">
+        <label for="class-color">צבע</label>
+        <input type="color" id="class-color">
+      </div>
+    </div>
+    <div class="field field-checkbox">
+      <input type="checkbox" id="class-elective">
+      <label for="class-elective">קורס בחירה — לא כל התלמידים משתתפים</label>
+    </div>
+    <div class="field">
+      <label>שעות השיעור</label>
+      <div id="slots-wrap"></div>
+      <button type="button" class="add-btn" id="slot-add-btn">+ הוספת שעה</button>
+    </div>
+    <p class="error-text" id="class-error"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn danger" id="class-delete-btn" style="display:none;">מחיקת שיעור</button>
+      <button type="button" class="btn" id="class-cancel">ביטול</button>
+      <button type="submit" class="btn primary">שמירה</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ---------- Homework dialog ---------- -->
+<dialog id="hw-dialog">
+  <form class="dialog-inner" id="hw-form">
+    <h3 id="hw-dialog-title">הוספת שיעורי בית</h3>
+    <div class="field">
+      <label for="hw-class">שיעור</label>
+      <select id="hw-class"></select>
+    </div>
+    <div class="field">
+      <label for="hw-title">כותרת</label>
+      <input type="text" id="hw-title" required maxlength="140">
+    </div>
+    <div class="field">
+      <label for="hw-details">פרטים (רשות)</label>
+      <textarea id="hw-details" maxlength="500"></textarea>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="hw-due">תאריך הגשה</label>
+        <input type="date" id="hw-due" required>
+      </div>
+      <div class="field">
+        <label for="hw-duetime">שעה (רשות)</label>
+        <input type="time" id="hw-duetime">
+      </div>
+    </div>
+    <p class="error-text" id="hw-error"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn danger" id="hw-delete-btn" style="display:none;">מחיקה</button>
+      <button type="button" class="btn" id="hw-cancel">ביטול</button>
+      <button type="submit" class="btn primary">שמירה</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ---------- Summary dialog ---------- -->
+<dialog id="sum-dialog">
+  <form class="dialog-inner" id="sum-form">
+    <h3 id="sum-dialog-title">הוספת סיכום יומי</h3>
+    <div class="field">
+      <label for="sum-class">שיעור</label>
+      <select id="sum-class"></select>
+    </div>
+    <div class="field">
+      <label for="sum-date">תאריך</label>
+      <input type="date" id="sum-date" required>
+    </div>
+    <div class="field">
+      <label for="sum-text">מה קרה בכיתה</label>
+      <textarea id="sum-text" required maxlength="600"></textarea>
+    </div>
+    <p class="error-text" id="sum-error"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn danger" id="sum-delete-btn" style="display:none;">מחיקה</button>
+      <button type="button" class="btn" id="sum-cancel">ביטול</button>
+      <button type="submit" class="btn primary">שמירה</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ---------- Confirm dialog ---------- -->
+<dialog id="confirm-dialog">
+  <div class="dialog-inner">
+    <h3 id="confirm-title">אישור</h3>
+    <p id="confirm-message" style="margin:0;color:var(--ink-soft);font-size:14px;"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" id="confirm-cancel">ביטול</button>
+      <button type="button" class="btn danger" id="confirm-ok">אישור</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ---------- Site text dialog ---------- -->
+<dialog id="text-dialog">
+  <form class="dialog-inner" id="text-form" style="max-height: 80vh; overflow-y: auto;">
+    <h3>עריכת טקסטים באתר</h3>
+    <div class="field"><label for="text-title">כותרת ראשית</label><input type="text" id="text-title" maxlength="80"></div>
+    <div class="field"><label for="text-tagline">תת-כותרת</label><input type="text" id="text-tagline" maxlength="200"></div>
+    <div class="field"><label for="text-weekHeading">כותרת: להגשה השבוע</label><input type="text" id="text-weekHeading" maxlength="60"></div>
+    <div class="field"><label for="text-weekHint">רמז: להגשה השבוע</label><input type="text" id="text-weekHint" maxlength="80"></div>
+    <div class="field"><label for="text-emptyWeek">הודעה כשאין מה להגיש</label><input type="text" id="text-emptyWeek" maxlength="120"></div>
+    <div class="field"><label for="text-scheduleHeading">כותרת: מערכת שעות</label><input type="text" id="text-scheduleHeading" maxlength="60"></div>
+    <div class="field"><label for="text-scheduleHint">רמז: מערכת שעות</label><input type="text" id="text-scheduleHint" maxlength="80"></div>
+    <div class="field"><label for="text-emptySchedule">הודעה כשאין מערכת שעות</label><input type="text" id="text-emptySchedule" maxlength="120"></div>
+    <div class="field"><label for="text-classesHeading">כותרת: שיעורים</label><input type="text" id="text-classesHeading" maxlength="60"></div>
+    <div class="field"><label for="text-classesHint">רמז: שיעורים</label><input type="text" id="text-classesHint" maxlength="80"></div>
+    <div class="field"><label for="text-emptyClasses">הודעה כשאין שיעורים</label><input type="text" id="text-emptyClasses" maxlength="120"></div>
+    <div class="field"><label for="text-emptySummaries">הודעה כשאין סיכומים</label><input type="text" id="text-emptySummaries" maxlength="120"></div>
+    <div class="field"><label for="text-electivesHeading">כותרת: קורסי בחירה</label><input type="text" id="text-electivesHeading" maxlength="60"></div>
+    <div class="field"><label for="text-electivesText">טקסט: קורסי בחירה (כשאין עדיין קורסי בחירה)</label><textarea id="text-electivesText" maxlength="400"></textarea></div>
+    <div class="field"><label for="text-electivesPrompt">טקסט: הנחיה לבחירת קורסים (כשיש קורסי בחירה)</label><textarea id="text-electivesPrompt" maxlength="400"></textarea></div>
+    <div class="field"><label for="text-footer">טקסט תחתית העמוד</label><textarea id="text-footer" maxlength="300"></textarea></div>
+    <p class="error-text" id="text-error"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" id="text-reset">שחזור ברירת מחדל</button>
+      <button type="button" class="btn" id="text-cancel">ביטול</button>
+      <button type="submit" class="btn primary">שמירה</button>
+    </div>
+  </form>
+</dialog>
+
+<!--HR_DATA_START--><script type="application/json" id="app-data">{"classes":[{"id":"utn7urmr9owjoj6djzl4","name":"ספרות והבעה","color":"#a6a9ab","elective":false,"order":0,"schedule":[{"day":"Sun","period":"1","time":"8:30 - 9:15"},{"day":"Sun","period":"2","time":"9:15 - 10:00"},{"day":"Thu","period":"3","time":"10:15 - 11:00"},{"day":"Thu","period":"4","time":"11:00 - 11:45"}]},{"id":"kl8pam4y4c6hpbn772oc","name":"ערבית","color":"#ff00c8","elective":false,"order":1,"schedule":[{"day":"Sun","period":"3","time":"10:15 - 11:00"},{"day":"Mon","period":"6","time":"13:35 - 12:50"},{"day":"Mon","period":"7","time":"14:05 - 14:45"}]},{"id":"83rchyjsvf1wks7uoehw","name":"כימיה","color":"#7f8255","elective":false,"order":2,"schedule":[{"day":"Sun","period":"5","time":"12:05 - 12:50"},{"day":"Wed","period":"5","time":"12:05 - 12:50"},{"day":"Wed","period":"6","time":"12:50 - 13:35"}]},{"id":"vxvimsrc5or8mf9tpmzx","name":"ביולוגיה","color":"#ffd500","elective":false,"order":3,"schedule":[{"day":"Sun","period":"4","time":"11:00 - 11:45"},{"day":"Wed","period":"1","time":"8:30 - 9:15"},{"day":"Wed","period":"2","time":"9:15 - 10:00"}]},{"id":"6hfhca0vrcp8mpaw5jbh","name":"מתמטיקה","color":"#e467c9","elective":false,"order":4,"schedule":[{"day":"Sun","period":"6","time":"12:50 - 13:35"},{"day":"Wed","period":"3","time":"10:15 - 11:00"},{"day":"Wed","period":"4","time":"11:00 - 11:45"},{"day":"Thu","period":"7","time":"14:05 - 14:45"},{"day":"Thu","period":"8","time":"14:45 - 15:25"},{"day":"Thu","period":"9","time":"15:30 - 16:15"}]},{"id":"t4xbt3u1nw4kj3br50vc","name":"אנגלית","color":"#cc8585","elective":false,"order":5,"schedule":[{"day":"Sun","period":"7","time":"14:05 - 14:45"},{"day":"Sun","period":"8","time":"14:45 - 15:25"},{"day":"Tue","period":"1","time":"8:30 - 9:15"},{"day":"Tue","period":"2","time":"9:15 - 10:00"}]},{"id":"qb9bzdkgszuj6tna1w60","name":"תרבות ישראל","color":"#84c8f5","elective":false,"order":6,"schedule":[{"day":"Mon","period":"1","time":"8:30 - 9:15"},{"day":"Mon","period":"2","time":"9:15 - 10:00"}]},{"id":"683edn413vf1qc92dtnx","name":"אדם ועולם","color":"#2ac200","elective":false,"order":7,"schedule":[{"day":"Mon","period":"3","time":"10:15 - 11:00"},{"day":"Mon","period":"4","time":"11:00 - 11:45"},{"day":"Thu","period":"5","time":"12:05 - 12:50"},{"day":"Thu","period":"6","time":"12:50 - 13:35"}]},{"id":"naglbaymlhsm6tlyxgj1","name":"של\"ח","color":"#912121","elective":false,"order":8,"schedule":[{"day":"Mon","period":"5","time":"12:05 - 12:50"}]},{"id":"9ggw7y5gfxd41e63rgb1","name":"חינוך גופני","color":"#87a202","elective":false,"order":9,"schedule":[{"day":"Mon","period":"8","time":"14:45 - 15:25"},{"day":"Wed","period":"7","time":"14:05 - 14:45"}]},{"id":"3rc0t59eje1eg539ll7r","name":"חינוך","color":"#ff9500","elective":false,"order":10,"schedule":[{"day":"Tue","period":"3","time":"10:15 - 11:00"},{"day":"Wed","period":"8","time":"14:45 - 15:25"},{"day":"Thu","period":"2","time":"9:15 - 10:00"}]},{"id":"gawq1319vy6do5497ha2","name":"מוזיקה","color":"#7300ff","elective":false,"order":11,"schedule":[{"day":"Tue","period":"4","time":"11:00 - 11:45"}]},{"id":"1bcgeu1lvf8nsxts16w1","name":"תנ\"ך","color":"#7fd062","elective":false,"order":12,"schedule":[{"day":"Tue","period":"5","time":"12:05 - 12:50"},{"day":"Tue","period":"6","time":"12:50 - 13:35"}]},{"id":"lbkqux8oqq3ah8htyrff","name":"כימיה אתגר","color":"#927245","elective":true,"order":13,"schedule":[{"day":"Sun","period":"5","time":"12:05 - 12:50"},{"day":"Wed","period":"5","time":"12:05 - 12:50"},{"day":"Wed","period":"6","time":"12:50 - 13:35"}]}],"homework":[],"summaries":[],"siteText":{"classesHeading":"שיעורים","classesHint":"","electivesHeading":"אתגרים","electivesPrompt":"תסמנו את האתגרים שבהם אתם משתתפים בהם.","electivesText":"קורסי הבחירה עדיין לא פורסמו — ברגע שיישלחו, כל אחד מהם יקבל טאב משלו למעלה, לצד השיעורים הקבועים.","emptyClasses":"אין עדיין שיעורים.","emptySchedule":"אין עדיין שיעורים במערכת השעות.","emptySummaries":"אין עדיין סיכומים.","emptyWeek":"אין שיעורי בית להגיש השבוע","footer":"","scheduleHeading":"מערכת שעות","scheduleHint":"","tagline":"","title":"חדר הכיתה","weekHeading":"להגשה השבוע","weekHint":""},"updatedAt":"2026-09-09"}</script><!--HR_DATA_END-->
+
+<script>
+  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  const DAY_LABELS = { Sun: 'ראשון', Mon: 'שני', Tue: 'שלישי', Wed: 'רביעי', Thu: 'חמישי', Fri: 'שישי' };
+  const LOCALE = 'he-IL';
+  const PRESET_COLORS = ['#3B6E91', '#8A4F7D', '#4B8B5B', '#A85D2E', '#6B5CA5', '#B0793A'];
+
+  const SITE_TEXT_DEFAULTS = {
+    title: 'חדר הכיתה',
+    tagline: 'שיעורי בית, מערכת שעות ומה שקרה בכיתה — הכול במקום אחד.',
+    weekHeading: 'להגשה השבוע',
+    weekHint: 'בכל השיעורים',
+    emptyWeek: 'אין מה להגיש השבוע.',
+    scheduleHeading: 'מערכת שעות שבועית',
+    scheduleHint: 'לעריכה — כניסה במצב עריכה',
+    emptySchedule: 'אין עדיין שיעורים במערכת השעות.',
+    classesHeading: 'שיעורים',
+    classesHint: 'שיעורי בית וסיכום יומי',
+    emptyClasses: 'אין עדיין שיעורים.',
+    emptySummaries: 'אין עדיין סיכומים.',
+    electivesHeading: 'קורסי בחירה',
+    electivesText: 'קורסי הבחירה עדיין לא פורסמו — ברגע שיישלחו, כל אחד מהם יקבל טאב משלו למעלה, לצד השיעורים הקבועים.',
+    electivesPrompt: 'סמנו את קורסי הבחירה שבהם אתם משתתפים. הסימון נשמר רק במכשיר הזה, ורק הקורסים שסימנתם יופיעו במערכת השעות ובטאבים שלמעלה.',
+    footer: 'הדף הזה משותף לכל הכיתה — כל אחד יכול לערוך אותו. נא לשמור על תוכן מדויק ומכבד.',
+  };
+
+  const SUPABASE_URL = 'https://thbverdqtbuvxcfkcwbk.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoYnZlcmRxdGJ1dnhjZmtjd2JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTE0ODksImV4cCI6MjEwMjYyNzQ4OX0.uLsi7p_KVgYpH1FuCZdFwMCPV1kmsksKF1-bAtFgodA';
+  const STATE_ENDPOINT = SUPABASE_URL + '/rest/v1/homeroom_state?id=eq.1';
+  const REFRESH_INTERVAL_MS = 45000;
+  const SB_HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY };
+
+  let saving = false;
+  let classes = [];
+  let classesById = {};
+  let homework = [];
+  let summaries = [];
+  let siteText = { ...SITE_TEXT_DEFAULTS };
+  let lastUpdated = '';
+  let activeClass = null;
+  let editing = false;
+  let selectedElectives = new Set();
+
+  function genId() {
+    try { return crypto.randomUUID(); } catch (_) { return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10); }
+  }
+
+  try { selectedElectives = new Set(JSON.parse(localStorage.getItem('hr_electives') || '[]')); } catch (_) {}
+
+  function saveElectives() {
+    try { localStorage.setItem('hr_electives', JSON.stringify([...selectedElectives])); } catch (_) {}
+  }
+
+  function visibleClasses() {
+    return classes.filter(c => !c.elective || editing || selectedElectives.has(c.id));
+  }
+
+  function esc(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function safeColor(c) {
+    return /^#[0-9a-fA-F]{6}$/.test(c || '') ? c : '#6B7280';
+  }
+
+  function parseDate(dateStr) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr || '')) return null;
+    const d = new Date(dateStr + 'T00:00:00');
+    return isNaN(d) ? null : d;
+  }
+
+  function parseDue(hw) {
+    const time = /^\d{2}:\d{2}$/.test(hw.dueTime || '') ? hw.dueTime : '23:59';
+    const d = new Date(hw.due + 'T' + time + ':00');
+    return isNaN(d) ? new Date(8640000000000000) : d;
+  }
+
+  function startOfToday() {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  function fmtDate(dateStr) {
+    const d = parseDate(dateStr);
+    return d ? d.toLocaleDateString(LOCALE, { month: 'short', day: 'numeric' }) : '—';
+  }
+
+  function fmtWeekday(dateStr) {
+    const d = parseDate(dateStr);
+    return d ? d.toLocaleDateString(LOCALE, { weekday: 'short' }) : '';
+  }
+
+  function urgency(hw) {
+    const today = startOfToday();
+    const due = parseDate(hw.due) || today;
+    const diffDays = Math.round((due - today) / 86400000);
+    if (diffDays < 0) return { key: 'today', label: 'באיחור' };
+    if (diffDays === 0) return { key: 'today', label: 'להגשה היום' };
+    if (diffDays === 1) return { key: 'soon', label: 'להגשה מחר' };
+    if (diffDays === 2) return { key: 'soon', label: 'להגשה בעוד יומיים' };
+    if (diffDays <= 3) return { key: 'soon', label: 'להגשה בעוד ' + diffDays + ' ימים' };
+    return { key: 'later', label: fmtWeekday(hw.due) };
+  }
+
+  function confirmAction(message) {
+    return new Promise(resolve => {
+      const dlg = document.getElementById('confirm-dialog');
+      document.getElementById('confirm-message').textContent = message;
+      const okBtn = document.getElementById('confirm-ok');
+      const cancelBtn = document.getElementById('confirm-cancel');
+      function cleanup(result) {
+        okBtn.removeEventListener('click', onOk);
+        cancelBtn.removeEventListener('click', onCancel);
+        dlg.removeEventListener('cancel', onCancel);
+        dlg.close();
+        resolve(result);
+      }
+      function onOk() { cleanup(true); }
+      function onCancel() { cleanup(false); }
+      okBtn.addEventListener('click', onOk);
+      cancelBtn.addEventListener('click', onCancel);
+      dlg.addEventListener('cancel', onCancel, { once: true });
+      dlg.showModal();
+    });
+  }
+
+  /* ---------------- Rendering ---------------- */
+
+  function renderAll() {
+    renderSiteText();
+    renderWeek();
+    renderSchedule();
+    renderTabs();
+    renderPanel();
+    renderElectivesBody();
+    updateEditButton();
+  }
+
+  function renderSiteText() {
+    document.getElementById('site-title').textContent = siteText.title;
+    document.getElementById('site-tagline').textContent = siteText.tagline;
+    document.getElementById('week-heading').textContent = siteText.weekHeading;
+    document.getElementById('week-hint').textContent = siteText.weekHint;
+    document.getElementById('schedule-heading').textContent = siteText.scheduleHeading;
+    document.getElementById('schedule-hint').textContent = siteText.scheduleHint;
+    document.getElementById('schedule-empty').textContent = siteText.emptySchedule;
+    document.getElementById('classes-heading').textContent = siteText.classesHeading;
+    document.getElementById('classes-hint').textContent = siteText.classesHint;
+    document.getElementById('electives-heading').textContent = siteText.electivesHeading;
+    document.getElementById('site-footer').textContent = siteText.footer;
+    document.title = siteText.title;
+  }
+
+  function renderElectivesBody() {
+    const container = document.getElementById('electives-body');
+    const electiveClasses = classes.filter(c => c.elective);
+
+    if (!electiveClasses.length) {
+      container.innerHTML = '<div class="electives-card">' + esc(siteText.electivesText) + '</div>';
+      return;
+    }
+
+    container.innerHTML = '<div class="electives-card">'
+      + '<div class="elective-prompt">' + esc(siteText.electivesPrompt) + '</div>'
+      + '<div class="elective-picker">'
+        + electiveClasses.map(c => {
+            const cc = safeColor(c.color);
+            const checked = selectedElectives.has(c.id);
+            return '<label class="elective-item" style="--cc:' + cc + '">'
+              + '<input type="checkbox" data-elective-id="' + c.id + '"' + (checked ? ' checked' : '') + '>'
+              + '<span class="dot" style="background:' + cc + '"></span>'
+              + '<span>' + esc(c.name) + '</span>'
+            + '</label>';
+          }).join('')
+      + '</div>'
+    + '</div>';
+
+    container.querySelectorAll('[data-elective-id]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const id = cb.dataset.electiveId;
+        if (cb.checked) {
+          selectedElectives.add(id);
+          const keys = (classesById[id].schedule || []).map(s => s.day + '|' + s.period);
+          electiveClasses.forEach(other => {
+            if (other.id === id || !selectedElectives.has(other.id)) return;
+            const overlaps = (other.schedule || []).some(s => keys.includes(s.day + '|' + s.period));
+            if (overlaps) {
+              selectedElectives.delete(other.id);
+              if (activeClass === other.id && !editing) activeClass = null;
+            }
+          });
+        } else {
+          selectedElectives.delete(id);
+          if (activeClass === id && !editing) activeClass = null;
+        }
+        saveElectives();
+        renderElectivesBody();
+        renderSchedule();
+        renderTabs();
+        renderPanel();
+      });
+    });
+  }
+
+  function renderWeek() {
+    const list = document.getElementById('week-list');
+    const today = startOfToday();
+    const inRange = homework
+      .filter(hw => classesById[hw.classId] && parseDate(hw.due))
+      .filter(hw => (parseDate(hw.due) - today) / 86400000 <= 7)
+      .sort((a, b) => parseDue(a) - parseDue(b));
+
+    if (!inRange.length) {
+      list.innerHTML = '<div class="empty-state">' + esc(siteText.emptyWeek) + '</div>';
+      return;
+    }
+
+    list.innerHTML = inRange.map(hw => {
+      const cls = classesById[hw.classId];
+      const cc = safeColor(cls.color);
+      const u = urgency(hw);
+      return '<div class="week-item" style="--cc:' + cc + '">'
+        + '<div class="bar" style="background:var(--cc)"></div>'
+        + '<div class="main">'
+          + '<div class="class-label" style="color:var(--cc)">' + esc(cls.name) + '</div>'
+          + '<div class="title">' + esc(hw.title) + '</div>'
+        + '</div>'
+        + '<div class="meta">'
+          + '<span class="pill ' + u.key + '">' + u.label + '</span>'
+          + '<div class="due mono">' + fmtDate(hw.due) + (hw.dueTime ? '<br>' + esc(hw.dueTime) : '') + '</div>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+  }
+
+  function renderSchedule() {
+    const table = document.getElementById('schedule-table');
+    const emptyEl = document.getElementById('schedule-empty');
+    const vis = visibleClasses();
+    const periods = [];
+    vis.forEach(c => (c.schedule || []).forEach(s => {
+      if (!periods.includes(s.period)) periods.push(s.period);
+    }));
+
+    if (!periods.length) {
+      table.innerHTML = '';
+      emptyEl.hidden = false;
+      return;
+    }
+    emptyEl.hidden = true;
+    periods.sort();
+
+    let html = '<thead><tr><th></th>' + DAYS.map(d => '<th>' + DAY_LABELS[d] + '</th>').join('') + '</tr></thead><tbody>';
+    periods.forEach(period => {
+      html += '<tr><td class="period-label">' + esc(period) + '</td>';
+      DAYS.forEach(day => {
+        const matches = vis.filter(c => (c.schedule || []).some(s => s.period === period && s.day === day));
+        const match = matches.find(c => c.elective) || matches[0];
+        if (match) {
+          const slot = match.schedule.find(s => s.period === period && s.day === day);
+          const cc = safeColor(match.color);
+          html += '<td><span class="cell-class" style="--cc:' + cc + '">'
+            + '<span class="cname">' + esc(match.name) + '</span>'
+            + '<span class="ctime">' + esc(slot.time) + '</span>'
+          + '</span></td>';
+        } else {
+          html += '<td></td>';
+        }
+      });
+      html += '</tr>';
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+  }
+
+  function renderTabs() {
+    const tabs = document.getElementById('tabs');
+    let html = visibleClasses().map(c => {
+      const cc = safeColor(c.color);
+      return '<button class="tab" role="tab" type="button" data-id="' + c.id + '" aria-selected="' + (c.id === activeClass) + '" style="--cc:' + cc + '">'
+        + '<span class="dot" style="background:' + cc + '"></span>' + esc(c.name)
+      + '</button>';
+    }).join('');
+    if (editing) html += '<button class="tab add-tab" type="button" id="add-class-tab">+ הוספת שיעור</button>';
+    tabs.innerHTML = html;
+
+    tabs.querySelectorAll('.tab[data-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeClass = btn.dataset.id;
+        renderTabs();
+        renderPanel();
+      });
+    });
+    const addTab = document.getElementById('add-class-tab');
+    if (addTab) addTab.addEventListener('click', () => openClassDialog(null));
+  }
+
+  function renderPanel() {
+    const panel = document.getElementById('class-panel');
+    const vis = visibleClasses();
+
+    if (!vis.length) {
+      panel.innerHTML = '<div class="empty-state">' + esc(siteText.emptyClasses) + (editing ? ' לחצו על "הוספת שיעור" למעלה כדי להתחיל.' : '') + '</div>';
+      return;
+    }
+    if (!activeClass || !classesById[activeClass] || !vis.some(c => c.id === activeClass)) activeClass = vis[0].id;
+    const cls = classesById[activeClass];
+
+    const hw = homework.filter(h => h.classId === activeClass).sort((a, b) => parseDue(a) - parseDue(b));
+    const sums = summaries.filter(s => s.classId === activeClass).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const scheduleStr = (cls.schedule || []).length
+      ? cls.schedule.map(s => DAY_LABELS[s.day] || s.day).join('/') + ' · ' + cls.schedule[0].time
+      : 'אין שעות משויכות';
+
+    const hwHtml = hw.length
+      ? hw.map(h => {
+          const u = urgency(h);
+          return '<div class="hw-card">'
+            + '<div class="title">' + esc(h.title) + '</div>'
+            + (h.details ? '<div class="details">' + esc(h.details) + '</div>' : '')
+            + '<div class="row">'
+              + '<span class="pill ' + u.key + '">' + u.label + '</span>'
+              + '<span class="due-inline mono">' + fmtDate(h.due) + (h.dueTime ? ', ' + esc(h.dueTime) : '') + '</span>'
+            + '</div>'
+            + (editing ? '<div class="row edit-row"><button class="icon-btn" type="button" data-edit-hw="' + h.id + '">✎ עריכה</button><button class="icon-btn" type="button" data-del-hw="' + h.id + '">✕ מחיקה</button></div>' : '')
+          + '</div>';
+        }).join('')
+      : '<div class="empty-state">לא פורסמו שיעורי בית ל' + esc(cls.name) + '.</div>';
+
+    const summaryHtml = sums.length
+      ? sums.map(s => '<div class="summary-card" style="--cc:' + safeColor(cls.color) + '">'
+          + '<div class="date">' + fmtDate(s.date) + '</div>'
+          + '<p>' + esc(s.text) + '</p>'
+          + (editing ? '<div class="row"><button class="icon-btn" type="button" data-edit-sum="' + s.id + '">✎ עריכה</button><button class="icon-btn" type="button" data-del-sum="' + s.id + '">✕ מחיקה</button></div>' : '')
+        + '</div>').join('')
+      : '<div class="empty-state">' + esc(siteText.emptySummaries) + '</div>';
+
+    panel.innerHTML = '<div class="class-panel-head">'
+        + '<div class="head-left">'
+          + '<h3 style="color:' + safeColor(cls.color) + '">' + esc(cls.name) + '</h3>'
+          + (editing ? '<button class="icon-btn" type="button" id="class-edit-btn">✎ עריכת שיעור</button>' : '')
+        + '</div>'
+        + '<span class="when">' + esc(scheduleStr) + '</span>'
+      + '</div>'
+      + '<div class="panel-columns">'
+        + '<div><div class="subhead">שיעורי בית</div><div class="hw-list">' + hwHtml + '</div>'
+          + (editing ? '<button class="add-btn" type="button" id="add-hw-btn">+ הוספת שיעורי בית</button>' : '')
+        + '</div>'
+        + '<div><div class="subhead">סיכום יומי</div><div class="summary-list">' + summaryHtml + '</div>'
+          + (editing ? '<button class="add-btn" type="button" id="add-sum-btn">+ הוספת סיכום</button>' : '')
+        + '</div>'
+      + '</div>';
+
+    if (!editing) return;
+
+    document.getElementById('class-edit-btn')?.addEventListener('click', () => openClassDialog(cls));
+    document.getElementById('add-hw-btn')?.addEventListener('click', () => openHwDialog(null, activeClass));
+    document.getElementById('add-sum-btn')?.addEventListener('click', () => openSumDialog(null, activeClass));
+
+    panel.querySelectorAll('[data-edit-hw]').forEach(b => b.addEventListener('click', () => openHwDialog(homework.find(h => h.id === b.dataset.editHw))));
+    panel.querySelectorAll('[data-del-hw]').forEach(b => b.addEventListener('click', async () => {
+      if (!(await confirmAction('למחוק את שיעורי הבית הזה?'))) return;
+      homework = homework.filter(h => h.id !== b.dataset.delHw);
+      renderAll();
+      await saveState();
+    }));
+    panel.querySelectorAll('[data-edit-sum]').forEach(b => b.addEventListener('click', () => openSumDialog(summaries.find(s => s.id === b.dataset.editSum))));
+    panel.querySelectorAll('[data-del-sum]').forEach(b => b.addEventListener('click', async () => {
+      if (!(await confirmAction('למחוק סיכום זה?'))) return;
+      summaries = summaries.filter(s => s.id !== b.dataset.delSum);
+      renderAll();
+      await saveState();
+    }));
+  }
+
+  function updateEditButton() {
+    const btn = document.getElementById('edit-toggle');
+    const textBtn = document.getElementById('edit-text-btn');
+    btn.style.display = 'inline-flex';
+    if (editing) {
+      btn.textContent = '✓ מצב עריכה פעיל — לסיום';
+      btn.classList.add('active');
+      textBtn.style.display = 'inline-flex';
+    } else {
+      btn.textContent = '✎ עריכה';
+      btn.classList.remove('active');
+      textBtn.style.display = 'none';
+    }
+  }
+
+  /* ---------------- Dialogs ---------------- */
+
+  function populateClassSelect(sel, selected) {
+    sel.innerHTML = classes.map(c => '<option value="' + c.id + '"' + (c.id === selected ? ' selected' : '') + '>' + esc(c.name) + '</option>').join('');
+  }
+
+  function openClassDialog(existing) {
+    const dlg = document.getElementById('class-dialog');
+    const form = document.getElementById('class-form');
+    form.reset();
+    document.getElementById('class-dialog-title').textContent = existing ? 'עריכת שיעור' : 'הוספת שיעור';
+    const nameInput = document.getElementById('class-name');
+    const colorInput = document.getElementById('class-color');
+    const electiveInput = document.getElementById('class-elective');
+    const slotsWrap = document.getElementById('slots-wrap');
+    const errorEl = document.getElementById('class-error');
+    const deleteBtn = document.getElementById('class-delete-btn');
+    errorEl.textContent = '';
+    deleteBtn.style.display = existing ? 'inline-block' : 'none';
+
+    nameInput.value = existing ? existing.name : '';
+    colorInput.value = safeColor(existing ? existing.color : PRESET_COLORS[classes.length % PRESET_COLORS.length]);
+    electiveInput.checked = !!(existing && existing.elective);
+
+    let slots = existing ? (existing.schedule || []).map(s => ({ ...s })) : [];
+
+    function renderSlots() {
+      slotsWrap.innerHTML = slots.length ? slots.map((s, i) => (
+        '<div class="slot-row">'
+          + '<select data-i="' + i + '" data-f="day">' + DAYS.map(d => '<option value="' + d + '"' + (s.day === d ? ' selected' : '') + '>' + DAY_LABELS[d] + '</option>').join('') + '</select>'
+          + '<input type="text" data-i="' + i + '" data-f="period" value="' + esc(s.period) + '" placeholder="שיעור 1">'
+          + '<input type="text" data-i="' + i + '" data-f="time" value="' + esc(s.time) + '" placeholder="8:00–8:50">'
+          + '<button type="button" class="icon-btn" data-remove="' + i + '" aria-label="הסרה">✕</button>'
+        + '</div>'
+      )).join('') : '<p style="margin:0;color:var(--ink-faint);font-size:12.5px;">אין עדיין שעות משויכות.</p>';
+
+      slotsWrap.querySelectorAll('select,input').forEach(el => {
+        el.addEventListener('input', () => { slots[+el.dataset.i][el.dataset.f] = el.value; });
+      });
+      slotsWrap.querySelectorAll('[data-remove]').forEach(b => {
+        b.addEventListener('click', () => { slots.splice(+b.dataset.remove, 1); renderSlots(); });
+      });
+    }
+    renderSlots();
+
+    document.getElementById('slot-add-btn').onclick = () => {
+      slots.push({ day: 'Mon', period: '', time: '' });
+      renderSlots();
+    };
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      if (!name) { errorEl.textContent = 'יש להזין שם שיעור.'; return; }
+      if (slots.some(s => !s.period.trim() || !s.time.trim())) {
+        errorEl.textContent = 'יש למלא שיעור ושעה בכל שורת מערכת שעות, או להסיר שורות ריקות.';
+        return;
+      }
+      const data = { name, color: safeColor(colorInput.value), elective: electiveInput.checked, schedule: slots.map(s => ({ ...s })) };
+      if (existing) {
+        Object.assign(existing, data);
+      } else {
+        const rec = { id: genId(), order: classes.length, ...data };
+        classes.push(rec);
+        classesById[rec.id] = rec;
+      }
+      renderAll();
+      const res = await saveState();
+      if (res.ok) dlg.close();
+      else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה בשמירה. נסו שוב.';
+    };
+
+    deleteBtn.onclick = async () => {
+      if (!existing) return;
+      if (!(await confirmAction('למחוק את "' + existing.name + '"? שיעורי הבית והסיכומים המשויכים לא יוצגו יותר.'))) return;
+      classes = classes.filter(c => c.id !== existing.id);
+      delete classesById[existing.id];
+      renderAll();
+      const res = await saveState();
+      if (res.ok) dlg.close();
+      else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה במחיקה.';
+    };
+
+    dlg.showModal();
+  }
+
+  function openHwDialog(existing, presetClassId) {
+    const dlg = document.getElementById('hw-dialog');
+    const form = document.getElementById('hw-form');
+    form.reset();
+    document.getElementById('hw-dialog-title').textContent = existing ? 'עריכת שיעורי בית' : 'הוספת שיעורי בית';
+    populateClassSelect(document.getElementById('hw-class'), existing ? existing.classId : presetClassId);
+    document.getElementById('hw-title').value = existing ? existing.title : '';
+    document.getElementById('hw-details').value = existing ? (existing.details || '') : '';
+    document.getElementById('hw-due').value = existing ? existing.due : '';
+    document.getElementById('hw-duetime').value = existing ? (existing.dueTime || '') : '';
+    const errorEl = document.getElementById('hw-error');
+    errorEl.textContent = '';
+    const deleteBtn = document.getElementById('hw-delete-btn');
+    deleteBtn.style.display = existing ? 'inline-block' : 'none';
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        classId: document.getElementById('hw-class').value,
+        title: document.getElementById('hw-title').value.trim(),
+        details: document.getElementById('hw-details').value.trim(),
+        due: document.getElementById('hw-due').value,
+        dueTime: document.getElementById('hw-duetime').value,
+      };
+      if (!data.title || !data.classId || !data.due) { errorEl.textContent = 'נא למלא שיעור, כותרת ותאריך.'; return; }
+      if (existing) {
+        Object.assign(existing, data);
+      } else {
+        homework.push({ id: genId(), ...data });
+      }
+      renderAll();
+      const res = await saveState();
+      if (res.ok) dlg.close();
+      else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה בשמירה.';
+    };
+
+    deleteBtn.onclick = async () => {
+      if (!existing) return;
+      if (!(await confirmAction('למחוק את שיעורי הבית הזה?'))) return;
+      homework = homework.filter(h => h.id !== existing.id);
+      renderAll();
+      const res = await saveState();
+      if (res.ok) dlg.close();
+      else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה במחיקה.';
+    };
+
+    dlg.showModal();
+  }
+
+  function openSumDialog(existing, presetClassId) {
+    const dlg = document.getElementById('sum-dialog');
+    const form = document.getElementById('sum-form');
+    form.reset();
+    document.getElementById('sum-dialog-title').textContent = existing ? 'עריכת סיכום' : 'הוספת סיכום יומי';
+    populateClassSelect(document.getElementById('sum-class'), existing ? existing.classId : presetClassId);
+    document.getElementById('sum-date').value = existing ? existing.date : new Date().toISOString().slice(0, 10);
+    document.getElementById('sum-text').value = existing ? existing.text : '';
+    const errorEl = document.getElementById('sum-error');
+    errorEl.textContent = '';
+    const deleteBtn = document.getElementById('sum-delete-btn');
+    deleteBtn.style.display = existing ? 'inline-block' : 'none';
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        classId: document.getElementById('sum-class').value,
+        date: document.getElementById('sum-date').value,
+        text: document.getElementById('sum-text').value.trim(),
+      };
+      if (!data.classId || !data.date || !data.text) { errorEl.textContent = 'נא למלא שיעור, תאריך וטקסט.'; return; }
+      if (existing) {
+        Object.assign(existing, data);
+      } else {
+        summaries.push({ id: genId(), ...data });
+      }
+      renderAll();
+      const res = await saveState();
+      if (res.ok) dlg.close();
+      else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה בשמירה.';
+    };
+
+    deleteBtn.onclick = async () => {
+      if (!existing) return;
+      if (!(await confirmAction('למחוק סיכום זה?'))) return;
+      summaries = summaries.filter(s => s.id !== existing.id);
+      renderAll();
+      const res = await saveState();
+      if (res.ok) dlg.close();
+      else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה במחיקה.';
+    };
+
+    dlg.showModal();
+  }
+
+  /* ---------------- Site text dialog ---------------- */
+
+  const TEXT_FIELDS = ['title', 'tagline', 'weekHeading', 'weekHint', 'emptyWeek', 'scheduleHeading', 'scheduleHint', 'emptySchedule', 'classesHeading', 'classesHint', 'emptyClasses', 'emptySummaries', 'electivesHeading', 'electivesText', 'electivesPrompt', 'footer'];
+
+  function openTextDialog() {
+    const dlg = document.getElementById('text-dialog');
+    document.getElementById('text-error').textContent = '';
+    TEXT_FIELDS.forEach(f => { document.getElementById('text-' + f).value = siteText[f]; });
+    dlg.showModal();
+  }
+
+  document.getElementById('edit-text-btn').addEventListener('click', openTextDialog);
+  document.getElementById('text-cancel').addEventListener('click', () => document.getElementById('text-dialog').close());
+
+  document.getElementById('text-reset').addEventListener('click', () => {
+    TEXT_FIELDS.forEach(f => { document.getElementById('text-' + f).value = SITE_TEXT_DEFAULTS[f]; });
+  });
+
+  document.getElementById('text-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById('text-error');
+    const data = {};
+    TEXT_FIELDS.forEach(f => {
+      data[f] = document.getElementById('text-' + f).value.trim();
+    });
+    siteText = { ...SITE_TEXT_DEFAULTS, ...data };
+    renderAll();
+    const res = await saveState();
+    if (res.ok) document.getElementById('text-dialog').close();
+    else if (res.code !== 'conflict') errorEl.textContent = 'שגיאה בשמירה. נסו שוב.';
+  });
+
+  /* ---------------- Edit gate ---------------- */
+
+  document.getElementById('edit-toggle').addEventListener('click', () => {
+    editing = !editing;
+    renderAll();
+  });
+
+  document.getElementById('class-cancel').addEventListener('click', () => document.getElementById('class-dialog').close());
+  document.getElementById('hw-cancel').addEventListener('click', () => document.getElementById('hw-dialog').close());
+  document.getElementById('sum-cancel').addEventListener('click', () => document.getElementById('sum-dialog').close());
+
+  /* ---------------- Data wiring ---------------- */
+
+  function showNotice(html) {
+    const el = document.getElementById('status-notice');
+    el.innerHTML = html;
+    el.hidden = false;
+  }
+
+  function applyState(data) {
+    classes = (data.classes || []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    classesById = {};
+    classes.forEach(c => { classesById[c.id] = c; });
+    homework = data.homework || [];
+    summaries = data.summaries || [];
+    siteText = { ...SITE_TEXT_DEFAULTS, ...(data.siteText || {}) };
+    lastUpdated = data.updatedAt || '';
+    document.getElementById('updated-date').textContent = lastUpdated ? fmtDate(lastUpdated) : '—';
+  }
+
+  function loadState() {
+    try {
+      const el = document.getElementById('app-data');
+      applyState(JSON.parse(el.textContent));
+    } catch (_) {
+      applyState({});
+    }
+  }
+
+  async function fetchRemoteState({ silent } = {}) {
+    try {
+      const res = await fetch(STATE_ENDPOINT + '&select=data,updated_at', { headers: SB_HEADERS, cache: 'no-store' });
+      if (!res.ok) throw new Error('http_' + res.status);
+      const rows = await res.json();
+      const row = rows && rows[0];
+      if (row && row.data) {
+        applyState(row.data);
+        renderAll();
+      }
+      return true;
+    } catch (_) {
+      if (!silent) showNotice('<strong>לא ניתן להתחבר לשרת המשותף.</strong> מוצגים הנתונים האחרונים שנטענו במכשיר הזה.');
+      return false;
+    }
+  }
+
+  async function saveState() {
+    if (saving) return { ok: false, code: 'busy' };
+    saving = true;
+    const state = {
+      classes,
+      homework,
+      summaries,
+      siteText,
+      updatedAt: new Date().toISOString().slice(0, 10),
+    };
+    try {
+      const res = await fetch(STATE_ENDPOINT, {
+        method: 'PATCH',
+        headers: { ...SB_HEADERS, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ data: state, updated_at: new Date().toISOString() }),
+      });
+      if (!res.ok) throw new Error('http_' + res.status);
+      lastUpdated = state.updatedAt;
+      document.getElementById('updated-date').textContent = fmtDate(lastUpdated);
+      return { ok: true, code: null };
+    } catch (_) {
+      showNotice('<strong>שגיאה בשמירה.</strong> בדקו את החיבור לאינטרנט ונסו שוב.');
+      return { ok: false, code: 'save_failed' };
+    } finally {
+      saving = false;
+    }
+  }
+
+  async function initApp() {
+    loadState();
+    renderAll();
+    await fetchRemoteState();
+    setInterval(() => { if (!editing) fetchRemoteState({ silent: true }); }, REFRESH_INTERVAL_MS);
+  }
+
+  /* ---------------- Theme toggle ---------------- */
+
+  function effectiveTheme() {
+    const explicit = document.documentElement.getAttribute('data-theme');
+    if (explicit === 'dark' || explicit === 'light') return explicit;
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+
+  function updateThemeToggle() {
+    const btn = document.getElementById('theme-toggle');
+    btn.textContent = effectiveTheme() === 'dark' ? '☀️' : '🌙';
+  }
+
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('hr_theme', next); } catch (_) {}
+    updateThemeToggle();
+  });
+
+  updateThemeToggle();
+  initApp();
+</script>
+</body>
+</html>
